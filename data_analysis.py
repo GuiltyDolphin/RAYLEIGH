@@ -8,19 +8,51 @@ import sys
 import getopt
 from optparse import OptionParser
 
-cluster_matcher = re.compile("(\[(?:\d+, )+\d+\])")
+_cluster_matcher = re.compile("(\[(?:\d+, )+\d+\])")
 
 
-def output_data(data, path=None):
+#### ANALYSIS ####
+
+def _output_data(data, path=None):
     """Send a JSON representation of the data to an output stream"""
+    json_format = {
+            'indent': 2
+            }
+
     if path is None:
-        print(json.dumps(data))
+        print("Writing to STDOUT currently disabled due to large datasets")
+        #print(json.dumps(data, **json_format))
     else:
-        json.dump(data, path)
+        with open(path, 'w') as f:
+            json.dump(data, f, **json_format)
 
 
-def setup_parser():
-    parser = OptionParser()
+def _retrieve_clusters(file_name):
+    """Retrieve clusters from frame file"""
+    with open(file_name) as f:
+        contents = f.read()
+
+    frames = re.split("Frame.*\n", contents)
+    _safe_remove(frames, '')
+    clusters = [[]] * len(frames)
+
+    for i, frame in enumerate(frames):
+        frame = frame.splitlines()
+        _safe_remove(frame, '')
+        for cluster in frame:
+            clusters[i].append(
+                    [eval(x) for x in _cluster_matcher.findall(cluster)])
+    return clusters
+
+
+#### COMMAND-LINE ####
+
+def _setup_parser(usage=None):
+    if usage is None:
+        parser = OptionParser()
+    else:
+        parser = OptionParser(usage)
+
     parser.add_option("-i", "--input-file", dest="input_file",
                       help="File to read cluster data from", metavar="FILE")
     parser.add_option("-o", "--output-file", dest="output_file",
@@ -32,7 +64,7 @@ def setup_parser():
     return parser
 
 
-def parse_options(argv):
+def _parse_options(argv):
     """Parse command-line options for script"""
 
     options = {
@@ -65,42 +97,32 @@ def parse_options(argv):
             options['verbose'] = True
     return options
 
+
 def _safe_remove(ls, c):
     if ls.count(c):
         ls.remove(c)
 
 
-def retrieve_clusters(file_name):
-    """Retrieve clusters from frame file"""
-    with open(file_name) as f:
-        contents = f.read()
-
-    frames = re.split("Frame.*\n", contents)
-    _safe_remove(frames, '')
-    clusters = [[]] * len(frames)
-
-    for i, frame in enumerate(frames):
-        frame = frame.splitlines()
-        _safe_remove(frame, '')
-        for cluster in frame:
-            clusters[i].append(
-                    [eval(x) for x in cluster_matcher.findall(cluster)])
-    return clusters
-
-
-def main(options):
-    verbose = options['verbose']
+def _main(args=sys.argv[1:]):
+    parser = _setup_parser()
+    (options, args) = parser.parse_args(args)
+    if len(args) != 1:
+        print("wrong number of arguments: {}".format(len(args)))
+        sys.exit(2)
+    else:
+        options.input_file = args[0]
+    verbose = options.verbose
     if verbose:
         print("Retrieving clusters...")
-    clusters = retrieve_clusters(options['input_file='])
+    clusters = _retrieve_clusters(options.input_file)
 
     if verbose:
         print("Found {} frames".format(len(clusters)))
         for i in range(len(clusters)):
             print("Frame {}:".format(i + 1))
             print("Clusters found: {}".format(len(clusters[i])))
-    output_data(clusters, options['output_file='])
+    _output_data(clusters, options.output_file)
 
 
 if __name__ == '__main__':
-    main(parse_options(sys.argv[1:]))
+    _main()

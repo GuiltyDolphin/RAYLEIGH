@@ -17,12 +17,20 @@ def output_data(data, path=None):
     else:
         json.dump(data, path)
 
+
 def parse_options(argv):
+    """Parse command-line options for script"""
     input_file = None
     output_file = None
 
+    options = {
+        'input_file': None,
+        'output_file': None
+        }
+
     try:
-        opts, args = getopt.getopt(argv, "hi:o", ["input-file=", "output-file=", "help"])
+        opts, args = getopt.getopt(
+            argv, "hi:o", ["input-file=", "output-file=", "help"])
     except getopt.GetoptError as e:
         print("Unknown option: {}".format(e.opt))
         print("Usage: {}".format(help_msg))
@@ -32,9 +40,10 @@ def parse_options(argv):
             print(help_msg)
             sys.exit()
         elif opt in ("-i", "--input-file"):
-            input_file = arg
+            options['input_file'] = arg
         elif opt in ("-o", "--output-file"):
-            output_file = arg
+            options['output_file'] = arg
+    return options
 
 
 def retrieve_clusters(file_name):
@@ -52,3 +61,13 @@ def retrieve_clusters(file_name):
         for cluster in frame:
             clusters[i].append(
                     [eval(x) for x in cluster_matcher.findall(cluster)])
+    return clusters
+
+
+def main(options):
+    clusters = retrieve_clusters(options['input_file'])
+    output_data(clusters, options['output_file'])
+
+
+if __name__ == '__main__':
+    main(parse_options(sys.argv))

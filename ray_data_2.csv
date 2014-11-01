@@ -1,0 +1,7 @@
+Timestamp,Latitude,Longitude,Time and Date,Duration of exposure (in seconds),Weather,Cluster rate,Alpha rate,Beta rate,Gamma rate,Surrounding Geology,Dose,Any other comments,Deviation from Method
+09/12/2013 16:35:01,51.34,1.17,04/05/2013 12:00:00,3600,"Fine, thanks",1.89,3.9,3.9,2.76,,,,
+03/03/2014 16:56:18,51.36,1.17,03/05/2013 11:30:00,3600,Fine,2,5,2,4,none,none,none,none
+,51.35,1.18,,,,9,3,5,2,,,,
+,51.33,1.19,,,,8,4,1,1,,,,
+,51.32,1.2,,,,7,2,3,3,,,,
+,51.37,1.16,,,,5,1,4,5,,,,

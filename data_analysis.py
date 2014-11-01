@@ -6,6 +6,7 @@ import re
 import json
 import sys
 import getopt
+from optparse import OptionParser
 
 cluster_matcher = re.compile("(\[(?:\d+, )+\d+\])")
 
@@ -16,6 +17,19 @@ def output_data(data, path=None):
         print(json.dumps(data))
     else:
         json.dump(data, path)
+
+
+def setup_parser():
+    parser = OptionParser()
+    parser.add_option("-i", "--input-file", dest="input_file",
+                      help="File to read cluster data from", metavar="FILE")
+    parser.add_option("-o", "--output-file", dest="output_file",
+                      help="File to write output to, if not supplied will write to STDOUT",
+                      default=None, metavar="FILE")
+    parser.add_option("-v", "--verbose", dest="verbose",
+                      help="Print status messages to STDOUT", default=False,
+                      action="store_true")
+    return parser
 
 
 def parse_options(argv):

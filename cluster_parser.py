@@ -5,26 +5,30 @@
 import re
 import json
 import sys
-import getopt
 from optparse import OptionParser
+import logging
 
 _cluster_matcher = re.compile("(\[(?:\d+, )+\d+\])")
 
 
-#### ANALYSIS ####
+#### DATA TRANSFER ####
 
-def _output_data(data, path=None):
-    """Send a JSON representation of the data to an output stream"""
-    json_format = {
-            'indent': 2
-            }
+def _gen_output_data(data):
+    """Generate the JSON representation of the data"""
+    json_format = {'indent': 2}
+    return json.dumps(data, **json_format)
+
+
+def _write_data(data, path=None):
+    """Write the JSON data to a file or stdout"""
 
     if path is None:
         print("Writing to STDOUT currently disabled due to large datasets")
+        #print(data)
         #print(json.dumps(data, **json_format))
     else:
         with open(path, 'w') as f:
-            json.dump(data, f, **json_format)
+            f.write(data)
 
 
 def _retrieve_clusters(file_name):
@@ -53,7 +57,7 @@ def _setup_parser(usage=None):
     else:
         parser = OptionParser(usage)
 
-    parser.add_option("-i", "--input-file", dest="input_file",
+    parser.add_option("-f", "--input-file", dest="input_file",
                       help="File to read cluster data from", metavar="FILE")
     parser.add_option("-o", "--output-file", dest="output_file",
                       help="File to write output to, if not supplied will write to STDOUT",
@@ -61,41 +65,16 @@ def _setup_parser(usage=None):
     parser.add_option("-v", "--verbose", dest="verbose",
                       help="Print status messages to STDOUT", default=False,
                       action="store_true")
+    parser.add_option("-i", "--info", dest="info",
+                      help="Print additional information about process",
+                      default=False, action="store_true")
+    parser.add_option("--no-log", dest="log", action="store_false", default=False,
+                      help="Don't write to a log file")
+    parser.add_option("--log", dest="log_level", default="ERROR",
+                      help="Set the logging level")
+    parser.add_option("--log-file", dest="log_file", default="cluster_parser.log",
+                      help="Specify the file to send log messages to")
     return parser
-
-
-def _parse_options(argv):
-    """Parse command-line options for script"""
-
-    options = {
-        'input_file=': None,
-        'output_file=': None,
-        'verbose': False
-        }
-
-    short_options = "hvi:o:"
-    long_options = [x.replace('_', '-') for x in options.keys()]
-    other_options = ["help"]
-    help_msg = "data_analysis [{}]".format(short_options)
-
-    try:
-        opts, args = getopt.getopt(
-            argv, short_options, long_options.extend(other_options))
-    except getopt.GetoptError as e:
-        print("Unknown option: {}".format(e.opt))
-        print("Usage: {}".format(help_msg))
-        sys.exit(2)
-    for opt, arg in opts:
-        if opt in ("-h", "--help"):
-            print(help_msg)
-            sys.exit()
-        elif opt in ("-i", "--input-file"):
-            options['input_file='] = arg
-        elif opt in ("-o", "--output-file"):
-            options['output_file='] = arg
-        elif opt in ("-v", "--verbose"):
-            options['verbose'] = True
-    return options
 
 
 def _safe_remove(ls, c):
@@ -106,23 +85,69 @@ def _safe_remove(ls, c):
 def _main(args=sys.argv[1:]):
     parser = _setup_parser()
     (options, args) = parser.parse_args(args)
+
     if len(args) != 1:
         print("wrong number of arguments: {}".format(len(args)))
         sys.exit(2)
     else:
         options.input_file = args[0]
-    verbose = options.verbose
-    if verbose:
-        print("Retrieving clusters...")
+
+    def set_logger():
+
+        time_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        log_level = getattr(logging, options.log_level.upper(), None)
+        if not isinstance(log_level, int):
+            raise ValueError("Invalid log level: {}".format(options.log_level))
+        logging.basicConfig(level=log_level, filename=options.log_file, format=time_format)
+
+        logger = logging.getLogger('cluster_parser')
+        logger.setLevel(log_level)
+
+        stream_level = getattr(
+            logging,
+            "DEBUG" if options.verbose else ("INFO" if options.info else "ERROR"),
+            None)
+        log_stdout = logging.StreamHandler()
+        log_stdout.setLevel(stream_level)
+        logger.addHandler(log_stdout)
+        return logger
+
+    logger = set_logger()
+    logger.setLevel(logging.DEBUG)
+
+    logger.debug("Retrieving clusters...")
     clusters = _retrieve_clusters(options.input_file)
 
-    if verbose:
-        print("Found {} frames".format(len(clusters)))
+    logger.info("Found {} frames".format(len(clusters)))
+    if options.info:
         for i in range(len(clusters)):
-            print("Frame {}:".format(i + 1))
-            print("Clusters found: {}".format(len(clusters[i])))
-    _output_data(clusters, options.output_file)
+            logger.info("Frame {}:".format(i + 1))
+            logger.info("Clusters found: {}".format(len(clusters[i])))
 
+    logger.debug("Converting data to JSON format...")
+    output_data = _gen_output_data(clusters)
+    logger.debug("Conversion complete")
+
+    if options.output_file:
+        logger.debug("Writing to {}".format(options.output_file))
+    else:
+        logger.debug("Writing to stdout...")
+
+    _write_data(output_data, options.output_file)
+
+    if options.output_file:
+        expected = len(output_data.splitlines())
+        #logger.debug("Expected to write {} lines to {}".format(
+        #    expected, options.output_file))
+        with open(options.output_file) as f:
+            actual = len(f.readlines())
+            if expected == actual:
+                logger.debug("Okay, wrote {} lines".format(expected))
+            else:
+                logger.warning("Expected to write {} lines but could only find {}, something may have gone wrong.".format(
+                    expected, actual))
+            logger.debug("{}: Wrote {} lines".format(
+                "Okay" if expected == actual else "Line mismatch", actual))
 
 if __name__ == '__main__':
     _main()

@@ -20,17 +20,21 @@ def output_data(data, path=None):
 
 def parse_options(argv):
     """Parse command-line options for script"""
-    input_file = None
-    output_file = None
 
     options = {
-        'input_file': None,
-        'output_file': None
+        'input_file=': None,
+        'output_file=': None,
+        'verbose': False
         }
+
+    short_options = "hvi:o:"
+    long_options = [x.replace('_', '-') for x in options.keys()]
+    other_options = ["help"]
+    help_msg = "data_analysis [{}]".format(short_options)
 
     try:
         opts, args = getopt.getopt(
-            argv, "hi:o", ["input-file=", "output-file=", "help"])
+            argv, short_options, long_options.extend(other_options))
     except getopt.GetoptError as e:
         print("Unknown option: {}".format(e.opt))
         print("Usage: {}".format(help_msg))
@@ -40,10 +44,16 @@ def parse_options(argv):
             print(help_msg)
             sys.exit()
         elif opt in ("-i", "--input-file"):
-            options['input_file'] = arg
+            options['input_file='] = arg
         elif opt in ("-o", "--output-file"):
-            options['output_file'] = arg
+            options['output_file='] = arg
+        elif opt in ("-v", "--verbose"):
+            options['verbose'] = True
     return options
+
+def _safe_remove(ls, c):
+    if ls.count(c):
+        ls.remove(c)
 
 
 def retrieve_clusters(file_name):
@@ -52,12 +62,12 @@ def retrieve_clusters(file_name):
         contents = f.read()
 
     frames = re.split("Frame.*\n", contents)
-    frames.remove('')
+    _safe_remove(frames, '')
     clusters = [[]] * len(frames)
 
     for i, frame in enumerate(frames):
         frame = frame.splitlines()
-        frame.remove('')
+        _safe_remove(frame, '')
         for cluster in frame:
             clusters[i].append(
                     [eval(x) for x in cluster_matcher.findall(cluster)])
@@ -65,9 +75,18 @@ def retrieve_clusters(file_name):
 
 
 def main(options):
-    clusters = retrieve_clusters(options['input_file'])
-    output_data(clusters, options['output_file'])
+    verbose = options['verbose']
+    if verbose:
+        print("Retrieving clusters...")
+    clusters = retrieve_clusters(options['input_file='])
+
+    if verbose:
+        print("Found {} frames".format(len(clusters)))
+        for i in range(len(clusters)):
+            print("Frame {}:".format(i + 1))
+            print("Clusters found: {}".format(len(clusters[i])))
+    output_data(clusters, options['output_file='])
 
 
 if __name__ == '__main__':
-    main(parse_options(sys.argv))
+    main(parse_options(sys.argv[1:]))

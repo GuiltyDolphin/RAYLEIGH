@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<datafile id="test-data">
+  <!-- Payload -->
+  <ismc>0</ismc>
+  <!-- Payload information -->
+  <framewidth>256</framewidth>
+  <frameheight>256</frameheight>
+  <payloadformat>0</payloadformat>
+  <!-- Acquisition information -->
+  <acqmode>1</acqmode>
+  <counterstr>0</counterstr>
+  <countersvc>1</countersvc>
+  <countersic>0</countersic>
+  <hwtimer>2</hwtimer>
+  <autoeraseint>0.0</autoeraseint>
+  <autoeraseintc>1</autoeraseintc>
+  <triggertime>0.0</triggertime>
+  <coincmode>0x00</coincmode>
+  <coincdelay>16</coincdelay>
+  <coinclivetime>0.0</coinclivetime>
+  <pixelmanversion>2.1.1</pixelmanversion>
+  <!-- Geospatial information -->
+  <lat>50.067277</lat>
+  <lon>14.422921</lon>
+  <alt>0.0000</alt>
+  <!-- Temporal information -->
+  <!-- Detector settings -->
+  <polarity>1</polarity>
+  <biasvoltage>100</biasvoltage>
+  <ikrum>1</ikrum>
+  <disc>127</disc>
+  <preamp>255</preamp>
+  <buffanaloga>127</buffanaloga>
+  <buffanalogb>127</buffanalogb>
+  <hist>0</hist>
+  <thl>384</thl>
+  <thlcoarse>7</thlcoarse>
+  <vcas>130</vcas>
+  <fbk>128</fbk>
+  <gnd>80</gnd>
+  <ths>100</ths>
+  <biaslvds>128</biaslvds>
+  <reflvds>128</reflvds>
+  <mpxclock>16.0</mpxclock>
+  <tpxclock>0x00</tpxclock>
+  <bsactive>1</bsactive>
+  <!-- Detector information -->
+  <chipboardid>H09-W0094</chipboardid>
+  <customname>LUCID-TPX3</customname>
+  <firmware>[Unknown]</firmware>
+  <interface>USB</interface>
+  <mpxtype>3</mpxtype>
+  <appfilters></appfilters>
+  <detx>0.0</detx>
+  <dety>0.0</dety>
+  <detz>0.0</detz>
+  <omegax>0.0</omegax>
+  <omegay>0.0</omegay>
+  <omegaz>0.0</omegaz>
+  <roll>0.0</roll>
+  <pitch>0.0</pitch>
+  <yaw>0.0</yaw>
+  <!-- Source information --> 
+  <sourceid>IEAP Am241 + In calibration 2012</sourceid>
+</datafile>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<datafile id="E06-W0087_2012-02-05-094249">
+  <!-- Payload -->
+  <ismc>0</ismc>
+  <!-- Geospatial information -->
+  <roll>0.0</roll>
+  <pitch>0.0</pitch>
+  <yaw>0.0</yaw>
+  <omegax>0.0</omegax>
+  <omegay>0.0</omegay>
+  <omegaz>0.0</omegaz>
+  <!-- Detector information -->
+  <customname>SN1004</customname>
+  <appfilters></appfilters>
+  <detx>0.0</detx>
+  <dety>0.0</dety>
+  <detz>0.0</detz>
+  <eulera>0.0</eulera>
+  <eulerb>0.0</eulerb>
+  <eulerc>0.0</eulerc>
+  <!-- Source information -->
+  <sourceid>ISS</sourceid>
+</datafile>
+

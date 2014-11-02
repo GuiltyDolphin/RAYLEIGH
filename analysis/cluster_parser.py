@@ -30,13 +30,15 @@ def _write_data(data, path=None):
         with open(path, 'w') as f:
             f.write(data)
 
-
-def _retrieve_clusters(file_name):
-    """Retrieve clusters from frame file"""
+def _get_clusters_from_file(file_name):
     with open(file_name) as f:
         contents = f.read()
+    return _retrieve_clusters(contents)
 
-    frames = re.split("Frame.*\n", contents)
+def _retrieve_clusters(data):
+    """Retrieve clusters from frame string"""
+
+    frames = re.split("Frame.*\n", data)
     _safe_remove(frames, '')
     clusters = [[]] * len(frames)
 
@@ -113,10 +115,10 @@ def _main(args=sys.argv[1:]):
         return logger
 
     logger = set_logger()
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.DEBUG)  # This appears to fix logging?
 
     logger.debug("Retrieving clusters...")
-    clusters = _retrieve_clusters(options.input_file)
+    clusters = _get_clusters_from_file(options.input_file)
 
     logger.info("Found {} frames".format(len(clusters)))
     if options.info:

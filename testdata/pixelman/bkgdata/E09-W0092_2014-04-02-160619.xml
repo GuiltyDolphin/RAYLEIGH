@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<datafile id="E09-W0092_2014-04-02-160609">
+  <!-- Payload -->
+  <ismc>0</ismc>
+  <!-- Geospatial information -->
+  <lat>51.261015</lat>
+  <lon>1.084127</lon>
+  <alt>48.0</alt>
+  <roll>0.0</roll>
+  <pitch>0.0</pitch>
+  <yaw>0.0</yaw>
+  <omegax>0.0</omegax>
+  <omegay>0.0</omegay>
+  <omegaz>0.0</omegaz>
+  <!-- Detector information -->
+  <customname>Leibniz</customname>
+  <appfilters></appfilters>
+  <detx>0.0</detx>
+  <dety>0.0</dety>
+  <detz>0.0</detz>
+  <eulera>0.0</eulera>
+  <eulerb>0.0</eulerb>
+  <eulerc>0.0</eulerc>
+  <!-- Source information -->
+  <sourceid>Background measurement</sourceid>
+</datafile>
+

@@ -47,7 +47,7 @@ def _retrieve_clusters(data):
         _safe_remove(frame, '')
         for cluster in frame:
             clusters[i].append(
-                    [eval(x) for x in _cluster_matcher.findall(cluster)])
+                    [json.loads(x) for x in _cluster_matcher.findall(cluster)])
     return clusters
 
 

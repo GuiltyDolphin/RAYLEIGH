@@ -7,8 +7,8 @@ import json
 import sys
 from optparse import OptionParser
 import logging
+from collections import deque
 
-_cluster_matcher = re.compile("(\[(?:\d+, )+\d+\])")
 
 
 #### DATA TRANSFER ####
@@ -30,6 +30,11 @@ def _write_data(data, path=None):
         with open(path, 'w') as f:
             f.write(data)
 
+
+def _is_calibration_data(data):
+    return "Frame" in data
+
+
 def _get_clusters_from_file(file_name):
     with open(file_name) as f:
         contents = f.read()
@@ -38,16 +43,34 @@ def _get_clusters_from_file(file_name):
 def _retrieve_clusters(data):
     """Retrieve clusters from frame string"""
 
-    frames = re.split("Frame.*\n", data)
-    _safe_remove(frames, '')
-    clusters = [[]] * len(frames)
+    def retrieve_from_standard_data(frame):
+        """Retrieve the clusters from a standard data file"""
+        hits = deque()
+        cluster_matcher = re.compile("(\d+)\s+(\d+)\s+(\d+)")
+        for hit in frame.splitlines():
+            x, y, c = map(int, cluster_matcher.search(hit).groups())
+            hits.append((x, y, c))
+        return list(hits)
 
-    for i, frame in enumerate(frames):
-        frame = frame.splitlines()
-        _safe_remove(frame, '')
-        for cluster in frame:
-            clusters[i].append(
-                    [json.loads(x) for x in _cluster_matcher.findall(cluster)])
+    def retrieve_from_calibration(frames):
+        """Retrieve the clusters from a calibration file"""
+        clusters = [[]] * len(frames)
+        cluster_matcher = re.compile("(\[(?:\d+, )+\d+\])")
+        for i, frame in enumerate(frames):
+            frame = frame.splitlines()
+            _safe_remove(frame, '')
+            for cluster in frame:
+                clusters[i].append(
+                        [json.loads(x) for x in cluster_matcher.findall(cluster)])
+        return clusters
+
+    if _is_calibration_data(data):
+        frames = re.split("Frame.*\n", data)
+        _safe_remove(frames, '')
+        clusters = retrieve_from_calibration(frames)
+    else:
+        clusters = retrieve_from_standard_data(data)
+
     return clusters
 
 

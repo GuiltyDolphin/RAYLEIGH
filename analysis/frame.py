@@ -76,10 +76,14 @@ class DSCParser:
             header_type[entry] = int(header_type[entry])
         return (header_type, header[3:])
 
-    def _parse_config(self, config, use_short=[], expect_list=[], use_alternate=[]):
+    def _parse_config(
+            self, config,
+            use_short=[], expect_list=[], use_alternate=[]):
         """Retrieve name and value of a config section"""
-        title = self._dsc_reg['title'].match(config[0]).groupdict()
-        str_value = self._dsc_reg['value'].match(config[2]).groupdict()['value']
+        def match_dict(name, pos):
+            return self._dsc_reg[name].match(config[pos]).groupdict()
+        title = match_dict('title', 0)
+        str_value = match_dict('value', 2)['value']
 
         def try_str_to_num(s):
             """Attemp to convert a string to an int or float"""
@@ -92,9 +96,11 @@ class DSCParser:
                     value = s
             return value
 
-        exps = [x[0] for x in expect_list]
+        def first(x):
+            return x[0]
+        exps = map(first, expect_list)
         for name in expect_list:
-            if title['short_name'] == name[0] or title['long_name'] == name[0]:
+            if first(name) in title.values():
                 value = str_value.split(name[1])
                 value = list(map(try_str_to_num, value))
                 if ('') in value:
@@ -103,19 +109,22 @@ class DSCParser:
         else:
             value = try_str_to_num(str_value)
 
-        def format_title(title):
-            return title.strip().replace(" ", "_").lower()
-
         for a in use_alternate:
-            if re.findall(a[0], config[0]):
+            if re.findall(first(a), first(config)):
                 title['short_name'] = a[1]
                 title['long_name'] = a[1]
                 break
 
+        def format_title(title):
+            return title.strip().replace(" ", "_").lower()
+
+        def return_hash(name):
+            return {format_title(title[name]): value}
+
         if title['long_name'] in use_short:
-            return {format_title(title['short_name']): value}
+            return return_hash('short_name')
         else:
-            return {format_title(title['long_name']): value}
+            return return_hash('long_name')
 
 
 

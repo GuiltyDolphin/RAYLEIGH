@@ -6,7 +6,7 @@ import tempfile
 import os
 import json
 
-import analysis.cluster_parser as cp
+import analysis.frame_parser as fp
 
 # NOTES:
 # * May want to move the cluster_parser into a class,
@@ -14,7 +14,7 @@ import analysis.cluster_parser as cp
 #   the module)
 
 
-class TestClusterParser(unittest.TestCase):
+class TestFrameParser(unittest.TestCase):
 
     """Tests for the cluster_parser module"""
 
@@ -40,7 +40,7 @@ class TestClusterParser(unittest.TestCase):
         21  85  60
         21  86  41"""
 
-        self.parser = cp.ClusterParser()
+        self.parser = fp.FrameParser()
         self.in_file_calibration = tempfile.NamedTemporaryFile(delete=False)
         self.in_file_frame = tempfile.NamedTemporaryFile(delete=False)
         self.out_file = tempfile.NamedTemporaryFile(delete=False)
@@ -55,19 +55,19 @@ class TestClusterParser(unittest.TestCase):
         os.remove(self.in_file_frame.name)
 
     def test_can_correctly_retrieve_data_from_calibration_file(self):
-        expected = self.parser._retrieve_clusters(self.cluster_text)
-        actual = self.parser._get_clusters_from_file(self.in_file_calibration.name)
+        expected = self.parser._retrieve_frame(self.cluster_text)
+        actual = self.parser._get_frame_from_file(self.in_file_calibration.name)
         self.assertEqual(expected, actual)
 
     def test_can_convert_calibration_to_json(self):
-        data = self.parser._retrieve_clusters(self.cluster_text)
+        data = self.parser._retrieve_frame(self.cluster_text)
         expected_json_data = json.loads(json.dumps(data))
         actual_json_data = json.loads(self.parser._gen_output_data(data))
 
         self.assertEqual(expected_json_data, actual_json_data)
 
     def test_output_calibration_data_written_correctly_to_file(self):
-        clusters = self.parser._retrieve_clusters(self.cluster_text)
+        clusters = self.parser._retrieve_frame(self.cluster_text)
         data = self.parser._gen_output_data(clusters)
         expected = json.loads(data)
         self.parser._write_data(data, self.out_file.name)
@@ -79,18 +79,18 @@ class TestClusterParser(unittest.TestCase):
         self.assertFalse(self.parser._is_calibration_data(self.frame_data))
 
     def test_can_correctly_retrieve_data_from_file(self):
-        expected = self.parser._retrieve_clusters(self.frame_data)
-        actual = self.parser._get_clusters_from_file(self.in_file_frame.name)
+        expected = self.parser._retrieve_frame(self.frame_data)
+        actual = self.parser._get_frame_from_file(self.in_file_frame.name)
         self.assertEqual(expected, actual)
 
     def test_can_convert_frame_data_to_json(self):
-        data = self.parser._retrieve_clusters(self.frame_data)
+        data = self.parser._retrieve_frame(self.frame_data)
         expected_json_data = json.loads(json.dumps(data))
         actual_json_data = json.loads(self.parser._gen_output_data(data))
         self.assertEqual(expected_json_data, actual_json_data)
 
     def test_output_frame_data_written_correctly_to_file(self):
-        clusters = self.parser._retrieve_clusters(self.frame_data)
+        clusters = self.parser._retrieve_frame(self.frame_data)
         data = self.parser._gen_output_data(clusters)
         expected = json.loads(data)
         self.parser._write_data(data, self.out_file.name)

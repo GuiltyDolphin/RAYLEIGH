@@ -10,9 +10,9 @@ import copy
 import pickle as pk
 import re
 
-from analysis import frame
+from analysis import dsc_parser as dscp
 
-data_frame = frame.Frame(
+data_frame = dscp.Frame(
     frame={
         'name': "A000000001",
         'type': "i16 [X,Y,C]",
@@ -51,7 +51,7 @@ class TestFrame(unittest.TestCase):
         pass
 
     def test_has_frame_class(self):
-        self.assertIsInstance(data_frame, frame.Frame)
+        self.assertIsInstance(data_frame, dscp.Frame)
 
 
 class TestDSCParser(unittest.TestCase):
@@ -61,7 +61,7 @@ class TestDSCParser(unittest.TestCase):
     def setUp(self):
         self.frame = copy.deepcopy(data_frame)
         self.pickled_frame = pk.dumps(self.frame, pk_protocol)
-        self.parser = frame.DSCParser()
+        self.parser = dscp.DSCParser()
         self.in_file = "testdata/frame_data.txt.dsc"
         self.out_file = tempfile.NamedTemporaryFile(delete=False)
         with open(self.in_file) as f:
@@ -143,7 +143,7 @@ class TestDSCParser(unittest.TestCase):
 
     def test_can_create_frame_from_dsc(self):
         self.assertIsInstance(
-            self.parser._frame_from_dsc(self.dsc_data), frame.Frame)
+            self.parser._frame_from_dsc(self.dsc_data), dscp.Frame)
 
     def test_creates_correct_frame_from_dsc(self):
         other = self.parser._frame_from_dsc(self.dsc_data)

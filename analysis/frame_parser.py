@@ -10,33 +10,33 @@ import logging
 from collections import deque
 
 
-class ClusterParser(object):
+class FrameParser(object):
 
     """Parser for frame files (calibration and standard)"""
 
     def __init__(self):
         """TODO: to be defined1. """
 
-    def _retrieve_clusters(self, data):
-        """Retrieve clusters from frame string"""
+    def _retrieve_frame(self, data):
+        """Retrieve frame from raw string"""
 
         def retrieve_from_standard_data(frame):
-            """Retrieve the clusters from a standard data file"""
+            """Retrieve the frame from a standard data file"""
             hits = deque()
-            cluster_matcher = re.compile("(\d+)\s+(\d+)\s+(\d+)")
+            hit_matcher = re.compile("(\d+)\s+(\d+)\s+(\d+)")
             for hit in frame.splitlines():
-                hits.append(list(map(int, cluster_matcher.search(hit).groups())))
+                hits.append(list(map(int, hit_matcher.search(hit).groups())))
             return list(hits)
 
         def retrieve_from_calibration(frames):
             """Retrieve the clusters from a calibration file"""
-            clusters = []
-            cluster_matcher = re.compile("(\[(?:\d+, )+\d+\])")
+            hits = []
+            hit_matcher = re.compile("(\[(?:\d+, )+\d+\])")
             for frame in frames:
-                for cluster in frame.splitlines():
-                    clusters.extend(
-                        map(json.loads, cluster_matcher.findall(cluster)))
-            return clusters
+                for hit_set in frame.splitlines():
+                    hits.extend(
+                        map(json.loads, hit_matcher.findall(hit_set)))
+            return hits
 
         if self._is_calibration_data(data):
             def _safe_remove(ls, c):
@@ -49,10 +49,10 @@ class ClusterParser(object):
         else:
             return retrieve_from_standard_data(data)
 
-    def _get_clusters_from_file(self, file_name):
+    def _get_frame_from_file(self, file_name):
         with open(file_name) as f:
             contents = f.read()
-        return self._retrieve_clusters(contents)
+        return self._retrieve_frame(contents)
 
     def _gen_output_data(self, data):
         """Generate the JSON representation of the data"""
@@ -132,13 +132,13 @@ def _main(args=sys.argv[1:]):
     logger = _set_logger()
     logger.setLevel(logging.DEBUG)  # This appears to fix logging?
 
-    parser = ClusterParser()
+    parser = FrameParser()
 
     logger.debug("Retrieving clusters...")
-    clusters = parser._get_clusters_from_file(options.input_file)
+    frame = parser._get_frame_from_file(options.input_file)
 
     logger.debug("Converting data to JSON format...")
-    output_data = parser._gen_output_data(clusters)
+    output_data = parser._gen_output_data(frame)
     logger.debug("Conversion complete")
 
     if options.output_file:

@@ -70,35 +70,35 @@ class TestDSCParser(unittest.TestCase):
     def tearDown(self):
         os.remove(self.out_file.name)
 
+    def get_matcher_dict(self, field, to_match):
+        matcher = self.parser._dsc_reg[field]
+        return matcher.match(to_match).groupdict()
+
     def test_can_match_title(self):
-        title_matcher = self.parser._dsc_reg['title']
         title = '"Acq time" ("Acquisition time [s]"):'
-        matches = title_matcher.match(title).groupdict()
+        matches = self.get_matcher_dict('title', title)
         short = matches['short_name']
         self.assertEqual('Acq time', short)
         long_name = matches['long_name']
         self.assertEqual('Acquisition time ', long_name)
 
     def test_can_match_data_type(self):
-        type_matcher = self.parser._dsc_reg['data_type']
         data_type = "double[1]"
-        matches = type_matcher.match(data_type).groupdict()
+        matches = self.get_matcher_dict('data_type', data_type)
         type_ = matches['type']
         self.assertEqual(type_, 'double')
         num = matches['num']
         self.assertEqual(num, '1')
 
     def test_can_match_value(self):
-        value_matcher = self.parser._dsc_reg['value']
         value = "60.000000"
-        matches = value_matcher.match(value).groupdict()
+        matches = self.get_matcher_dict('value', value)
         val = matches['value']
         self.assertEqual(val, '60.000000')
 
     def test_can_match_header(self):
-        header_matcher = self.parser._dsc_reg['header']
         header_type = "Type=i16 [X,Y,C] width=256 height=256"
-        matches = header_matcher.match(header_type).groupdict()
+        matches = self.get_matcher_dict('header', header_type)
         type_ = matches['type']
         self.assertEqual(type_, "i16 [X,Y,C]")
         width = matches['width']
@@ -140,15 +140,16 @@ class TestDSCParser(unittest.TestCase):
         expected = dict(start_time_string=2)
         self.assertEqual(expected, self.parser._parse_config(config, use_alternate=config_alternate))
 
-
     def test_can_create_frame_from_dsc(self):
-        self.assertIsInstance(
-            self.parser._frame_from_dsc(self.dsc_data), dscp.Frame)
+        frame = self.parser._frame_from_dsc(self.dsc_data)
+        self.assertIsInstance(frame, dscp.Frame)
 
     def test_creates_correct_frame_from_dsc(self):
         other = self.parser._frame_from_dsc(self.dsc_data)
-        self.assertEqual(self.frame.__dict__, other.__dict__)
+        self.assertDictEqual(self.frame.__dict__, other.__dict__)
+        #self.assertEqual(self.frame.__dict__, other.__dict__)
 
-    def creates_correct_frame_from_pickle(self):
+    def test_creates_correct_frame_from_pickle(self):
         other = pk.loads(self.parser._pickle_from_dsc(self.dsc_data))
-        self.assertEqual(self.frame.__dict__, other.__dict__)
+        self.assertDictEqual(self.frame.__dict__, other.__dict__)
+        #self.assertEqual(self.frame.__dict__, other.__dict__)

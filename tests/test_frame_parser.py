@@ -5,13 +5,9 @@ import unittest
 import tempfile
 import os
 import json
+import shutil
 
 import analysis.frame_parser as fp
-
-# NOTES:
-# * May want to move the cluster_parser into a class,
-#   to allow for extra configuration (and not overload
-#   the module)
 
 
 class TestFrameParser(unittest.TestCase):
@@ -67,7 +63,6 @@ class TestFrameParser(unittest.TestCase):
         data = self.get_hits()
         expected_json_data = json.loads(json.dumps(data))
         actual_json_data = json.loads(self.parser._gen_output_data(data))
-
         self.assertEqual(expected_json_data, actual_json_data)
 
     def test_output_calibration_data_written_correctly_to_file(self):
@@ -99,4 +94,97 @@ class TestFrameParser(unittest.TestCase):
         expected = json.loads(data)
         self.parser._write_data(data, self.out_file.name)
         with open(self.out_file.name) as f:
+            self.assertEqual(expected, json.loads(f.read()))
+
+class TestDirectoryParsing(unittest.TestCase):
+    """Tests regarding multiple files for the FrameParser"""
+
+    def setUp(self):
+        self.parser = fp.FrameParser()
+        self.text1 = """1 2 3
+        4 5 6
+        7 8 9"""
+        self.text2 = """10 11 12
+        13 14 15
+        16 17 18"""
+        self.dir = tempfile.mkdtemp()
+        file_options = {'delete': False, 'dir': self.dir}# 'suffix': '.txt'}
+        self.in_file1 = tempfile.NamedTemporaryFile(suffix="d00.txt", **file_options)
+        self.in_file2 = tempfile.NamedTemporaryFile(suffix="d01.txt", **file_options)
+        file_options.update(suffix='.txt.dsc')
+        self.dsc_file = tempfile.NamedTemporaryFile(**file_options)
+        with open(self.in_file1.name, 'w') as f:
+            f.write(self.text1)
+        with open(self.in_file2.name, 'w') as f:
+            f.write(self.text2)
+
+        def get_new_file_name(fname):
+            base = os.path.basename(fname)
+            new_name = os.path.splitext(base)[0] + ".json"
+            return self.dir + "/output/" + new_name
+        self.out_name1 = get_new_file_name(self.in_file1.name)
+        self.out_name2 = get_new_file_name(self.in_file2.name)
+
+    def tearDown(self):
+        os.remove(self.in_file1.name)
+        os.remove(self.in_file2.name)
+        os.remove(self.dsc_file.name)
+        shutil.rmtree(self.dir)
+
+    def get_base_names(self, files):
+        return [os.path.basename(f.name) for f in files]
+
+    def get_expected_names(self, files):
+        names = self.get_base_names(files)
+        return [os.path.splitext(n)[0] + ".json" for n in names]
+
+    def test_creates_suitable_directory_structure(self):
+        self.parser._write_output_directory(self.dir)
+        name1, name2, name3 = self.get_base_names([self.in_file1, self.in_file2, self.dsc_file])
+        exp1, exp2 = self.get_expected_names([self.in_file1, self.in_file2])
+        actual = os.listdir(self.dir)
+        expected_contents = [name1, name2, name3, "output"]
+        self.assertCountEqual(expected_contents, actual)
+
+    def get_expected_data(self):
+        """Helper - Data expected to be (retrievable) written to frames"""
+        expect1 = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+        expect2 = [[10, 11, 12], [13, 14, 15], [16, 17, 18]]
+        return [expect1, expect2]
+
+    def test_creates_files_with_correct_contents(self):
+        self.parser._write_output_directory(self.dir)
+        expect1, expect2 = self.get_expected_data()
+        with open(self.out_name1) as f:
+            actual1 = json.loads(f.read())
+        with open(self.out_name2) as f:
+            actual2 = json.loads(f.read())
+        self.assertEqual(expect1, actual1)
+        self.assertEqual(expect2, actual2)
+
+    def test_only_converts_files_with_specified_extension(self):
+        exp1, exp2 = self.get_expected_names([self.in_file1, self.in_file2])
+        self.parser._write_output_directory(self.dir)
+        self.assertCountEqual([exp1, exp2, "frames.json"], os.listdir(self.dir + "/output"))
+
+    def replace_extension(self, file, ext):
+        return os.path.splitext(file)[0] + ext
+
+    def test_allows_conversion_file_extension_to_be_specified(self):
+        ext = ".sometext"
+        new1 = self.replace_extension(self.in_file1.name, ext)
+        new2 = self.replace_extension(self.in_file2.name, ext)
+        os.rename(self.in_file1.name, new1)
+        os.rename(self.in_file2.name, new2)
+        exp1 = os.path.basename(self.replace_extension(new1, ".json"))
+        exp2 = os.path.basename(self.replace_extension(new2, ".json"))
+        self.parser._write_output_directory(self.dir, ext)
+        self.assertCountEqual([exp1, exp2, "frames.json"], os.listdir(self.dir + "/output"))
+        os.rename(new1, self.in_file1.name)
+        os.rename(new2, self.in_file2.name)
+
+    def test_total_frame_output_has_correct_data(self):
+        expected = self.get_expected_data()
+        self.parser._write_output_directory(self.dir)
+        with open(self.dir + "/output/frames.json") as f:
             self.assertEqual(expected, json.loads(f.read()))

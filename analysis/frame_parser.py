@@ -8,6 +8,7 @@ import sys
 from optparse import OptionParser
 import logging
 from collections import deque
+import os
 
 
 class FrameParser(object):
@@ -50,6 +51,7 @@ class FrameParser(object):
             return retrieve_from_standard_data(data)
 
     def _get_frame_from_file(self, file_name):
+        """Retrieve frame from a file object"""
         with open(file_name) as f:
             contents = f.read()
         return self._retrieve_frame(contents)
@@ -68,7 +70,48 @@ class FrameParser(object):
                 f.write(data)
 
     def _is_calibration_data(self, data):
+        """Determine whether some data is valid calibration data"""
         return "Frame" in data
+
+    def _write_output_directory(self, directory, extension=".txt"):
+        """Write output to specified directory"""
+        def add_extension(fname, extension):
+            return fname + extension
+
+        def gen_output_path(fname):
+            new_name = add_extension(
+                os.path.splitext(os.path.basename(fname))[0], ".json")
+            new_dir = os.path.dirname(fname) + "/output/"
+            return new_dir + new_name
+
+        def get_valid_files(directory, ext):
+            def with_dir(files):
+                return map(lambda x: directory + "/" + x, files)
+
+            def with_extension(files):
+                return filter(lambda x: os.path.splitext(x)[1] == ext, files)
+
+            return with_extension(filter(os.path.isfile, with_dir(os.listdir(directory))))
+
+        os.mkdir(directory + "/output/")
+
+        frames = []
+        frame_number_matcher = re.compile("(\d+)\D*\.{}".format(extension.partition(".")[2]))
+
+        def cmp_func(x):
+            return int(frame_number_matcher.findall(x)[0])
+
+        for f in sorted(get_valid_files(directory, extension), key=cmp_func):
+            frames.append(json.loads(
+                self._parse_file_and_write(f, gen_output_path(f))))
+        with open(directory + "/output/frames.json", 'w') as f:
+            f.write(json.dumps(frames))
+
+    def _parse_file_and_write(self, in_file, out_file=None):
+        frame = self._get_frame_from_file(in_file)
+        output_data = self._gen_output_data(frame)
+        self._write_data(output_data, out_file)
+        return output_data
 
 
 #### COMMAND-LINE ####
@@ -78,7 +121,7 @@ def _setup_parser(usage=None):
     #parser.add_option("-f", "--input-file", dest="input_file",
     #                  help="File to read cluster data from", metavar="FILE")
     parser.add_option("-o", "--output-file", dest="output_file",
-                      help="File to write output to, if not supplied will write to STDOUT",
+                      help="File to write output to or STDOUT",
                       default=None, metavar="FILE")
     parser.add_option("-v", "--verbose", dest="verbose",
                       help="Print status messages to STDOUT", default=False,
@@ -86,15 +129,15 @@ def _setup_parser(usage=None):
     parser.add_option("-i", "--info", dest="info",
                       help="Print additional information about process",
                       default=False, action="store_true")
-    parser.add_option("--no-log", dest="log", action="store_false", default=False,
+    parser.add_option("--no-log", dest="log",
+                      action="store_false", default=False,
                       help="Don't write to a log file")
     parser.add_option("--log", dest="log_level", default="ERROR",
                       help="Set the logging level")
-    parser.add_option("--log-file", dest="log_file", default="cluster_parser.log",
+    parser.add_option("--log-file", dest="log_file",
+                      default="frame_parser.log",
                       help="Specify the file to send log messages to")
     return parser
-
-
 
 
 def _main(args=sys.argv[1:]):
@@ -108,6 +151,7 @@ def _main(args=sys.argv[1:]):
         options.input_file = args[0]
 
     def _set_logger():
+        """Return a configured logger"""
         time_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
         log_level = getattr(logging, options.log_level.upper(), None)
         if not isinstance(log_level, int):
@@ -121,8 +165,8 @@ def _main(args=sys.argv[1:]):
         logger.setLevel(log_level)
 
         stream_level = getattr(
-            logging,
-            "DEBUG" if options.verbose else ("INFO" if options.info else "ERROR"),
+            logging, "DEBUG" if options.verbose
+            else ("INFO" if options.info else "ERROR"),
             None)
         log_stdout = logging.StreamHandler()
         log_stdout.setLevel(stream_level)
@@ -148,16 +192,16 @@ def _main(args=sys.argv[1:]):
 
     parser._write_data(output_data, options.output_file)
 
-    if options.output_file:
-        expected = len(output_data.splitlines())
-        with open(options.output_file) as f:
-            actual = len(f.readlines())
-            if expected == actual:
-                logger.debug("Okay, wrote {} lines".format(expected))
-            else:
-                logger.warning("""Expected to write {} lines but could only
-                        find {}, something may have gone wrong.""".format(
-                    expected, actual))
+    #if options.output_file:
+    #    expected = len(output_data.splitlines())
+    #    with open(options.output_file) as f:
+    #        actual = len(f.readlines())
+    #        if expected == actual:
+    #            logger.debug("Okay, wrote {} lines".format(expected))
+    #        else:
+    #            logger.warning("""Expected to write {} lines but could only
+    #                    find {}, something may have gone wrong.""".format(
+    #                expected, actual))
 
 
 if __name__ == '__main__':

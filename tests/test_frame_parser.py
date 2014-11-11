@@ -12,7 +12,7 @@ import analysis.frame_parser as fp
 
 class TestFrameParser(unittest.TestCase):
 
-    """Tests for the cluster_parser module"""
+    """Tests for the frame_parser module"""
 
     def setUp(self):
         self.cluster_text = """
@@ -95,6 +95,7 @@ class TestFrameParser(unittest.TestCase):
         self.parser._write_data(data, self.out_file.name)
         with open(self.out_file.name) as f:
             self.assertEqual(expected, json.loads(f.read()))
+
 
 class TestDirectoryParsing(unittest.TestCase):
     """Tests regarding multiple files for the FrameParser"""
@@ -188,3 +189,37 @@ class TestDirectoryParsing(unittest.TestCase):
         self.parser._write_output_directory(self.dir)
         with open(self.dir + "/output/frames.json") as f:
             self.assertEqual(expected, json.loads(f.read()))
+
+
+class TestFrameGraphing(unittest.TestCase):
+
+    """Tests for graph output from the Graph Plotter"""
+
+    def setUp(self):
+        self.xyz = [(1, 2, 3), (4, 5, 6), (7, 8, 9)]
+        self.xs = [1, 4, 7]
+        self.ys = [2, 5, 8]
+        self.zs = [3, 6, 9]
+        self.plotter = fp.GraphPlotter()
+        self.fig, self.ax = self.plotter._generate_basic_figure()
+
+    def tearDown(self):
+        pass
+
+    def test_inserts_elements_at_correct_indices(self):
+        arr = self.plotter._generate_with_coordinates(*self.xyz)
+        arr = self.plotter._generate_with_coordinates(self.xs, self.ys, self.zs)
+        arr_vals = [arr[x, y] for (x, y) in zip(self.xs, self.ys)]
+        self.assertEqual(self.zs, arr_vals)
+
+    def test_basic_figure_correct_labels(self):
+        #fig, ax = self.plotter._generate_figure()
+        self.assertEqual("Y coordinates", self.ax.get_ylabel())
+        self.assertEqual("X coordinates", self.ax.get_xlabel())
+
+    def test_basic_figure_correct_limits(self):
+        expected = (0, 255)
+        self.assertEqual(expected, self.ax.get_ylim())
+        self.assertEqual(expected, self.ax.get_xlim())
+
+

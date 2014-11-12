@@ -1,0 +1,7 @@
+*.csv
+*.json
+*.egg-info
+__pycache__
+*.pyc
+testdata
+data_class.py

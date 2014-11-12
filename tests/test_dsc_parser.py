@@ -62,7 +62,7 @@ class TestDSCParser(unittest.TestCase):
         self.frame = copy.deepcopy(data_frame)
         self.pickled_frame = pk.dumps(self.frame, pk_protocol)
         self.parser = dscp.DSCParser()
-        self.in_file = "testdata/frame_data.txt.dsc"
+        self.in_file = "tests/frame_data.txt.dsc"
         self.out_file = tempfile.NamedTemporaryFile(delete=False)
         with open(self.in_file) as f:
             self.dsc_data = f.read()

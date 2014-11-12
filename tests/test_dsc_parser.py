@@ -71,40 +71,33 @@ class TestDSCParser(unittest.TestCase):
         os.remove(self.out_file.name)
 
     def get_matcher_dict(self, field, to_match):
+        """Helper - Get the groupdict of parser regex"""
         matcher = self.parser._dsc_reg[field]
         return matcher.match(to_match).groupdict()
 
     def test_can_match_title(self):
         title = '"Acq time" ("Acquisition time [s]"):'
         matches = self.get_matcher_dict('title', title)
-        short = matches['short_name']
-        self.assertEqual('Acq time', short)
-        long_name = matches['long_name']
-        self.assertEqual('Acquisition time ', long_name)
+        self.assertEqual('Acq time', matches['short_name'])
+        self.assertEqual('Acquisition time ', matches['long_name'])
 
     def test_can_match_data_type(self):
         data_type = "double[1]"
         matches = self.get_matcher_dict('data_type', data_type)
-        type_ = matches['type']
-        self.assertEqual(type_, 'double')
-        num = matches['num']
-        self.assertEqual(num, '1')
+        self.assertEqual('double', matches['type'])
+        self.assertEqual('1', matches['num'])
 
     def test_can_match_value(self):
         value = "60.000000"
         matches = self.get_matcher_dict('value', value)
-        val = matches['value']
-        self.assertEqual(val, '60.000000')
+        self.assertEqual('60.000000', matches['value'])
 
     def test_can_match_header(self):
         header_type = "Type=i16 [X,Y,C] width=256 height=256"
         matches = self.get_matcher_dict('header', header_type)
-        type_ = matches['type']
-        self.assertEqual(type_, "i16 [X,Y,C]")
-        width = matches['width']
-        self.assertEqual(width, "256")
-        height = matches['height']
-        self.assertEqual(height, "256")
+        self.assertEqual("i16 [X,Y,C]", matches['type'])
+        self.assertEqual("256", matches['width'])
+        self.assertEqual("256", matches['height'])
 
     def test_can_analyse_dsc_header(self):
         header = [

@@ -13,6 +13,7 @@ import os
 import numpy as np
 from matplotlib import pyplot as plt
 
+
 class FrameParser(object):
 
     """Parser for frame files (calibration and standard)"""
@@ -23,6 +24,9 @@ class FrameParser(object):
     def _retrieve_frame(self, data):
         """Retrieve frame from raw string"""
 
+        ## Might want to sort out the below two methods
+        ## - Might not be wise to have two unknown paths
+        ## within one function
         def retrieve_from_standard_data(frame):
             """Retrieve the frame from a standard data file"""
             hits = deque()
@@ -77,20 +81,26 @@ class FrameParser(object):
 
     def _write_output_directory(self, directory, extension=".txt"):
         """Write output to specified directory"""
+
         def add_extension(fname, extension):
+            """Append the extension to the file name"""
             return fname + extension
 
         def gen_output_path(fname):
+            """Generate the expected path that the file will be written to"""
             new_name = add_extension(
                 os.path.splitext(os.path.basename(fname))[0], ".json")
             new_dir = os.path.dirname(fname) + "/output/"
             return new_dir + new_name
 
         def get_valid_files(directory, ext):
+            """Get a list of the (files) that match the extension in directory"""
             def with_dir(files):
+                """Prepend the directory path to each of the files in file"""
                 return map(lambda x: directory + "/" + x, files)
 
             def with_extension(files):
+                """Get a filtered list of files matching the file extension"""
                 return filter(lambda x: os.path.splitext(x)[1] == ext, files)
 
             return with_extension(filter(os.path.isfile, with_dir(os.listdir(directory))))
@@ -116,8 +126,6 @@ class FrameParser(object):
         return output_data
 
 
-#### Graph Plotter ####
-
 class GraphPlotter():
     def _generate_with_coordinates(self, xs, ys, zs, size=(256, 256)):
         """Populate an empty numpy array of size with zs
@@ -137,9 +145,14 @@ class GraphPlotter():
         ax.set_xlim((0, 255))
         return fig, ax
 
+    def _plot_heatmap(self, data):
+        pass
+
+
 
 #### COMMAND-LINE ####
 
+## Perhaps the CLI section should be moved into it's own class?
 def _setup_parser(usage=None):
     parser = OptionParser(usage) if usage else OptionParser()
     #parser.add_option("-f", "--input-file", dest="input_file",
@@ -197,6 +210,12 @@ def _main(args=sys.argv[1:]):
         logger.addHandler(log_stdout)
         return logger
 
+    ## Fix the logging section below
+    ## - The Debug may be removed until needed
+    ## - This section should probably be written in TDD
+    ##   style later on, to remove any UI bugs.
+    ##   - Figure out a good way to test the user's interaction
+    ##     with the application (and the graphing)
     logger = _set_logger()
     logger.setLevel(logging.DEBUG)  # This appears to fix logging?
 
@@ -215,17 +234,6 @@ def _main(args=sys.argv[1:]):
         logger.debug("Writing to stdout...")
 
     parser._write_data(output_data, options.output_file)
-
-    #if options.output_file:
-    #    expected = len(output_data.splitlines())
-    #    with open(options.output_file) as f:
-    #        actual = len(f.readlines())
-    #        if expected == actual:
-    #            logger.debug("Okay, wrote {} lines".format(expected))
-    #        else:
-    #            logger.warning("""Expected to write {} lines but could only
-    #                    find {}, something may have gone wrong.""".format(
-    #                expected, actual))
 
 
 if __name__ == '__main__':

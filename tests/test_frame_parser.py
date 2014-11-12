@@ -109,7 +109,7 @@ class TestDirectoryParsing(unittest.TestCase):
         13 14 15
         16 17 18"""
         self.dir = tempfile.mkdtemp()
-        file_options = {'delete': False, 'dir': self.dir}# 'suffix': '.txt'}
+        file_options = {'delete': False, 'dir': self.dir}
         self.in_file1 = tempfile.NamedTemporaryFile(suffix="d00.txt", **file_options)
         self.in_file2 = tempfile.NamedTemporaryFile(suffix="d01.txt", **file_options)
         file_options.update(suffix='.txt.dsc')
@@ -202,18 +202,16 @@ class TestFrameGraphing(unittest.TestCase):
         self.zs = [3, 6, 9]
         self.plotter = fp.GraphPlotter()
         self.fig, self.ax = self.plotter._generate_basic_figure()
+        self.heatmap_data = self.plotter._generate_with_coordinates(self.xs, self.ys, self.zs)
 
     def tearDown(self):
         pass
 
     def test_inserts_elements_at_correct_indices(self):
-        arr = self.plotter._generate_with_coordinates(*self.xyz)
-        arr = self.plotter._generate_with_coordinates(self.xs, self.ys, self.zs)
-        arr_vals = [arr[x, y] for (x, y) in zip(self.xs, self.ys)]
+        arr_vals = [self.heatmap_data[x, y] for (x, y) in zip(self.xs, self.ys)]
         self.assertEqual(self.zs, arr_vals)
 
     def test_basic_figure_correct_labels(self):
-        #fig, ax = self.plotter._generate_figure()
         self.assertEqual("Y coordinates", self.ax.get_ylabel())
         self.assertEqual("X coordinates", self.ax.get_xlabel())
 
@@ -222,4 +220,11 @@ class TestFrameGraphing(unittest.TestCase):
         self.assertEqual(expected, self.ax.get_ylim())
         self.assertEqual(expected, self.ax.get_xlim())
 
+    def test_basic_heatmap_correct_data(self):
+        heatmap = self.plotter._plot_heatmap(self.heatmap_data)
+        self.fail("Need to implement test - Read below comment")
+        # Retrieve the datapoints from the generated heatmap
+        # and compare against the known points of the prevously
+        # generated numpy array
+        #self.assertEqual(self.heatmap_data,
 

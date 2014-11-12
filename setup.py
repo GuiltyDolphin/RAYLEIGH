@@ -5,6 +5,6 @@
 from setuptools import setup
 
 setup(
-    name='Ray_Analysis',
+    name='RAYLEIGH',
     test_suite='nose.collector'
     )

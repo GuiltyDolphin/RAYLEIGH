@@ -62,7 +62,7 @@ class TestDSCParser(unittest.TestCase):
         self.frame = copy.deepcopy(data_frame)
         self.pickled_frame = pk.dumps(self.frame, pk_protocol)
         self.parser = dscp.DSCParser()
-        self.in_file = "tests/frame_data.txt.dsc"
+        self.in_file = "tests/dsc_data.txt.dsc"
         self.out_file = tempfile.NamedTemporaryFile(delete=False)
         with open(self.in_file) as f:
             self.dsc_data = f.read()
@@ -140,9 +140,7 @@ class TestDSCParser(unittest.TestCase):
     def test_creates_correct_frame_from_dsc(self):
         other = self.parser._frame_from_dsc(self.dsc_data)
         self.assertDictEqual(self.frame.__dict__, other.__dict__)
-        #self.assertEqual(self.frame.__dict__, other.__dict__)
 
     def test_creates_correct_frame_from_pickle(self):
         other = pk.loads(self.parser._pickle_from_dsc(self.dsc_data))
         self.assertDictEqual(self.frame.__dict__, other.__dict__)
-        #self.assertEqual(self.frame.__dict__, other.__dict__)

@@ -145,10 +145,6 @@ class GraphPlotter():
         ax.set_xlim((0, 255))
         return fig, ax
 
-    def _plot_heatmap(self, data):
-        pass
-
-
 
 #### COMMAND-LINE ####
 

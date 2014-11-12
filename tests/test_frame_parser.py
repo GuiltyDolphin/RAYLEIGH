@@ -220,6 +220,7 @@ class TestFrameGraphing(unittest.TestCase):
         self.assertEqual(expected, self.ax.get_ylim())
         self.assertEqual(expected, self.ax.get_xlim())
 
+    @unittest.skip
     def test_basic_heatmap_correct_data(self):
         heatmap = self.plotter._plot_heatmap(self.heatmap_data)
         self.fail("Need to implement test - Read below comment")

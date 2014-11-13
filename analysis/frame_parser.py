@@ -100,19 +100,27 @@ class FrameParser(object):
                 """Get a filtered list of files matching the file extension"""
                 return filter(lambda x: os.path.splitext(x)[1] == ext, files)
 
-            return with_extension(filter(os.path.isfile, with_dir(os.listdir(directory))))
+            return with_extension(
+                filter(os.path.isfile, with_dir(os.listdir(directory))))
 
         os.mkdir(directory + "/output/")
 
         frames = []
         frame_number_matcher = re.compile("(\d+)\D*\.{}".format(extension.partition(".")[2]))
 
-        def cmp_func(x):
-            return int(frame_number_matcher.findall(x)[0])
+        def frame_compare():
+            def cmp_func(x):
+                return int(frame_number_matcher.findall(x)[0])
+            return sorted(get_valid_files(directory, extension), key=cmp_func)
 
-        for f in sorted(get_valid_files(directory, extension), key=cmp_func):
-            frames.append(json.loads(
-                self._parse_file_and_write(f, gen_output_path(f))))
+        def write_to_frames_list():
+            """Append the contents of each frame
+            (sorted by frame number) to the total frames"""
+            for f in frame_compare():
+                frames.append(json.loads(
+                    self._parse_file_and_write(f, gen_output_path(f))))
+
+        write_to_frames_list()
         with open(directory + "/output/frames.json", 'w') as f:
             f.write(json.dumps(frames, indent=2))
 
@@ -126,6 +134,8 @@ class FrameParser(object):
 #### COMMAND-LINE ####
 
 ## Perhaps the CLI section should be moved into it's own class?
+## Also - Add better testing for this section - maybe even rewrite
+## it in TDD style
 def _setup_parser(usage=None):
     parser = OptionParser(usage) if usage else OptionParser()
     #parser.add_option("-f", "--input-file", dest="input_file",

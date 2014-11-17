@@ -96,6 +96,9 @@ class TestFrameParser(unittest.TestCase):
         with open(self.out_file.name) as f:
             self.assertEqual(expected, json.loads(f.read()))
 
+    def test_can_recognise_file_input(self):
+        self.assertEqual("file", self.parser._input_type(self.in_file_frame.name))
+
 
 class TestDirectoryParsing(unittest.TestCase):
     """Tests regarding multiple files for the FrameParser"""
@@ -189,3 +192,11 @@ class TestDirectoryParsing(unittest.TestCase):
         self.parser._write_output_directory(self.dir)
         with open(self.dir + "/output/frames.json") as f:
             self.assertEqual(expected, json.loads(f.read()))
+
+    def test_can_automatically_detect_directories(self):
+        self.assertEqual("directory", self.parser._input_type(self.dir))
+
+    def test_can_detect_and_write_to_output_dir(self):
+        exp1, exp2 = self.get_expected_names([self.in_file1, self.in_file2])
+        self.parser._detect_input_and_write(self.dir)
+        self.assertCountEqual([exp1, exp2, "frames.json"], os.listdir(self.dir + "/output"))

@@ -130,6 +130,20 @@ class FrameParser(object):
         self._write_data(output_data, out_file)
         return output_data
 
+    def _input_type(self, input_):
+        if os.path.isdir(input_):
+            return "directory"
+        elif os.path.isfile(input_):
+            return "file"
+        raise FileError("Could not recognize input type")
+
+    def _detect_input_and_write(self, input_, out_file=None):
+        type_ = self._input_type(input_)
+        if type_ == "directory":
+            self._write_output_directory(input_)
+        elif type_ == "file":
+            self._parse_file_and_write(input_, out_file)
+
 
 #### COMMAND-LINE ####
 
@@ -205,18 +219,21 @@ def _main(args=sys.argv[1:]):
     parser = FrameParser()
 
     logger.debug("Retrieving clusters...")
-    frame = parser._get_frame_from_file(options.input_file)
+    logger.debug("Running parsers, logging reduced...")
+    parser._detect_input_and_write(options.input_file, options.output_file)
 
-    logger.debug("Converting data to JSON format...")
-    output_data = parser._gen_output_data(frame)
-    logger.debug("Conversion complete")
+    #frame = parser._get_frame_from_file(options.input_file)
 
-    if options.output_file:
-        logger.debug("Writing to {}".format(options.output_file))
-    else:
-        logger.debug("Writing to stdout...")
+    #logger.debug("Converting data to JSON format...")
+    #output_data = parser._gen_output_data(frame)
+    #logger.debug("Conversion complete")
 
-    parser._write_data(output_data, options.output_file)
+    #if options.output_file:
+    #    logger.debug("Writing to {}".format(options.output_file))
+    #else:
+    #    logger.debug("Writing to stdout...")
+
+    #parser._write_data(output_data, options.output_file)
 
 
 if __name__ == '__main__':

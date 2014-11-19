@@ -6,7 +6,9 @@ from matplotlib import pyplot as plt
 import numpy as np
 import json
 import os
+import sys
 from optparse import OptionParser
+
 
 class GraphPlotter():
     def _generate_with_coordinates(self, frame, size=(256, 256)):
@@ -22,8 +24,8 @@ class GraphPlotter():
         fig, ax = plt.subplots()
         ax.set_ylabel("Y coordinate")
         ax.set_xlabel("X coordinate")
-        ax.set_ylim((0,255))
-        ax.set_xlim((0,255))
+        ax.set_ylim((0, 255))
+        ax.set_xlim((0, 255))
         ax.set_aspect('equal')
         return fig, ax
 
@@ -55,10 +57,16 @@ class GraphPlotter():
         return self._gen_heatmap(data)
 
     def _write_heatmap_from_file(self, input_file, output=None):
-        fig, _, _ = self._gen_heatmap_from_file(input_file)
+        fig, ax, heatmap = self._gen_heatmap_from_file(input_file)
         os.mkdir(os.path.dirname(input_file) + "/plots")
-        fig.savefig(output or "{}/plots/{}.png".format(
-            os.path.dirname(input_file), os.path.basename(input_file)))
+        self._write_heatmap(output or "{}/plots/{}.png".format(
+            os.path.dirname(input_file), os.path.basename(input_file)),
+            (fig, ax, heatmap))
+
+    def _write_heatmap(self, output_path, heatmap):
+        fig, _, _ = heatmap
+        fig.savefig(output_path)
+
 
 class AppGraphPlotter():
     def __init__(self):
@@ -66,9 +74,31 @@ class AppGraphPlotter():
         self._plotter = GraphPlotter()
 
         self._option_parser.add_option('-w', '--write',
-                help="Write the graph to file",
-                default=False, action='store_true')
+            help="Write the graph to file",
+            default=False, action='store_true')
 
         self._option_parser.add_option('--no-view',
-                help="Do not view the graph - only useful in conjunction with other flags",
-                default=False, action='store_true')
+            help="Do not view the graph - only useful in conjunction with other flags",
+            default=False, action='store_true')
+
+        self._option_parser.add_option('-f', '--file-name',
+            help="Provide the file name to be read explicitly",
+            default=None)
+
+    def _run_with_args(self, args):
+        options, args = self._option_parser.parse_args(args)
+        file_name = options.file_name or args[0]
+
+        # Assume heatmap for the moment
+        figmap = self._plotter._gen_heatmap_from_file(file_name)
+
+        if not options.no_view:
+            figmap[0].show()
+
+        if options.write:
+            self._plotter._write_heatmap_from_file(file_name)
+
+
+if __name__ == '__main__':
+    app = AppGraphPlotter()
+    app._run_with_args(sys.argv[1:])

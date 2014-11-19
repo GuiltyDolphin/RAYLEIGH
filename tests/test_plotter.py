@@ -53,6 +53,17 @@ class TestFrameGraphing(unittest.TestCase):
         self.assertEqual(expected, self.ax.get_ylim())
         self.assertEqual(expected, self.ax.get_xlim())
 
+    def test_write_to_file_heatmap_provided(self):
+        figmap = self.plotter._gen_heatmap_from_file(self.in_file_frame.name)
+        os.mkdir(self.dir + "/plots")
+        out_dir = self.dir + "/plots"
+        with tempfile.NamedTemporaryFile(dir=self.dir) as f:
+            new_name = out_dir + "/{}.png".format(os.path.basename(f.name))
+            self.plotter._write_heatmap(new_name, figmap)
+            expected_contents = [new_name]
+        actual = os.listdir(out_dir)
+        self.assertIn(os.path.basename(new_name), os.listdir(out_dir))
+
     def test_basic_figure_correct_aspect(self):
         self.assertEqual('equal', self.ax.get_aspect())
 
@@ -85,6 +96,7 @@ class TestUserInteraction(unittest.TestCase):
         self.interface = plotter.AppGraphPlotter()
         self.optparser = self.interface._option_parser
         self.plotter = self.interface._plotter
+        self.test_args = ['--no-view']
 
         self.fig, self.ax = self.plotter._generate_basic_figure()
         self.heatmap_data = self.plotter._generate_with_coordinates(self.xyz)
@@ -98,6 +110,7 @@ class TestUserInteraction(unittest.TestCase):
             base = os.path.basename(fname)
             new_name = os.path.splitext(base)[0] + ".png"
             return self.dir + "/plots/" + new_name
+
         self.out_name = get_new_file_name(self.in_file_frame.name)
 
 
@@ -118,8 +131,14 @@ class TestUserInteraction(unittest.TestCase):
         self.assertEqual(False, option.default)
         self.assertEqual('Do not view the graph - only useful in conjunction with other flags', option.help)
 
-    #def test_accepts_single_files_and_writes(self):
-    #    self.interface._run_with_args(self.in_file_frame.name + ' -w')
-    #    expected_contents = [os.path.basename(self.out_name)]
-    #    actual = os.listdir(self.dir + "/plots")
-    #    self.assertCountEqual(expected_contents, actual)
+    def test_provides_explicit_file_name_option(self):
+        option = self.optparser.get_option('-f')
+        self.assertEqual('--file-name', option.get_opt_string())
+        self.assertIsNone(option.default)
+        self.assertEqual('Provide the file name to be read explicitly', option.help)
+
+    def test_accepts_single_files_and_writes(self):
+        self.interface._run_with_args(self.test_args + [self.in_file_frame.name, '-w'])
+        expected_contents = [os.path.basename(self.out_name)]
+        actual = os.listdir(self.dir + "/plots")
+        self.assertCountEqual(expected_contents, actual)

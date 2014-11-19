@@ -6,7 +6,7 @@ from matplotlib import pyplot as plt
 import numpy as np
 import json
 import os
-
+from optparse import OptionParser
 
 class GraphPlotter():
     def _generate_with_coordinates(self, frame, size=(256, 256)):
@@ -59,3 +59,16 @@ class GraphPlotter():
         os.mkdir(os.path.dirname(input_file) + "/plots")
         fig.savefig(output or "{}/plots/{}.png".format(
             os.path.dirname(input_file), os.path.basename(input_file)))
+
+class AppGraphPlotter():
+    def __init__(self):
+        self._option_parser = OptionParser()
+        self._plotter = GraphPlotter()
+
+        self._option_parser.add_option('-w', '--write',
+                help="Write the graph to file",
+                default=False, action='store_true')
+
+        self._option_parser.add_option('--no-view',
+                help="Do not view the graph - only useful in conjunction with other flags",
+                default=False, action='store_true')

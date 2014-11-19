@@ -70,3 +70,56 @@ class TestFrameGraphing(unittest.TestCase):
         expected_contents = [os.path.basename(self.out_name)]
         actual = os.listdir(self.dir + "/plots")
         self.assertCountEqual(expected_contents, actual)
+
+
+class TestUserInteraction(unittest.TestCase):
+
+    """Test the users' interface to the graph module"""
+
+    def setUp(self):
+        self.xyz = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+        self.xs = [1, 4, 7]
+        self.ys = [2, 5, 8]
+        self.zs = [3, 6, 9]
+
+        self.interface = plotter.AppGraphPlotter()
+        self.optparser = self.interface._option_parser
+        self.plotter = self.interface._plotter
+
+        self.fig, self.ax = self.plotter._generate_basic_figure()
+        self.heatmap_data = self.plotter._generate_with_coordinates(self.xyz)
+
+        self.dir = tempfile.mkdtemp()
+        self.in_file_frame = tempfile.NamedTemporaryFile(delete=False, dir=self.dir)
+        with open(self.in_file_frame.name, 'w') as f:
+            f.write(json.dumps(self.xyz))
+
+        def get_new_file_name(fname):
+            base = os.path.basename(fname)
+            new_name = os.path.splitext(base)[0] + ".png"
+            return self.dir + "/plots/" + new_name
+        self.out_name = get_new_file_name(self.in_file_frame.name)
+
+
+    def tearDown(self):
+        os.remove(self.in_file_frame.name)
+        shutil.rmtree(self.dir)
+
+    def test_provides_write_option(self):
+        option = self.optparser.get_option('-w')
+        self.assertEqual('--write', option.get_opt_string())
+        self.assertFalse(option.default)
+        self.assertEqual('Write the graph to file', option.help)
+        self.assertTrue(self.interface._option_parser.has_option('-w'))
+
+    def test_provides_no_view_option(self):
+        option = self.optparser.get_option('--no-view')
+        self.assertEqual('--no-view', option.get_opt_string())
+        self.assertEqual(False, option.default)
+        self.assertEqual('Do not view the graph - only useful in conjunction with other flags', option.help)
+
+    #def test_accepts_single_files_and_writes(self):
+    #    self.interface._run_with_args(self.in_file_frame.name + ' -w')
+    #    expected_contents = [os.path.basename(self.out_name)]
+    #    actual = os.listdir(self.dir + "/plots")
+    #    self.assertCountEqual(expected_contents, actual)

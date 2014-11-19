@@ -8,6 +8,7 @@ import shutil
 import json
 
 import matplotlib
+import numpy as np
 
 from analysis import plotter
 
@@ -41,7 +42,7 @@ class TestFrameGraphing(unittest.TestCase):
         shutil.rmtree(self.dir)
 
     def test_inserts_elements_at_correct_indices(self):
-        arr_vals = [self.heatmap_data[x, y] for (x, y) in zip(self.xs, self.ys)]
+        arr_vals = list(self.heatmap_data.take(2, axis=1))
         self.assertEqual(self.zs, arr_vals)
 
     def test_basic_figure_correct_labels(self):
@@ -67,20 +68,23 @@ class TestFrameGraphing(unittest.TestCase):
     def test_basic_figure_correct_aspect(self):
         self.assertEqual('equal', self.ax.get_aspect())
 
-    @unittest.skip
-    def test_basic_heatmap_correct_data(self):
-        heatmap = self.plotter._plot_heatmap(self.heatmap_data)
-        self.fail("Need to implement test - Read below comment")
-        # Retrieve the datapoints from the generated heatmap
-        # and compare against the known points of the prevously
-        # generated numpy array
-        #self.assertEqual(self.heatmap_data,
-
     def test_can_write_output_file_to_directory(self):
         self.plotter._write_heatmap_from_file(self.in_file_frame.name)
         expected_contents = [os.path.basename(self.out_name)]
         actual = os.listdir(self.dir + "/plots")
         self.assertCountEqual(expected_contents, actual)
+
+    def test_can_determine_outliers(self):
+        outliers = 1
+        frame = np.random.randint(0, 255, (20, 3))
+        vals = frame.take(2, axis=1)
+        d = np.abs(vals - np.median(vals))
+        meds = np.median(d)
+        s = d / meds if meds else 0
+        new_frame = frame[s<outliers]
+        arr = self.plotter._generate_with_coordinates(frame, outliers=outliers)
+        self.assertTrue(np.array_equal(new_frame, arr))
+
 
 
 class TestUserInteraction(unittest.TestCase):

@@ -11,12 +11,17 @@ from optparse import OptionParser
 
 
 class GraphPlotter():
-    def _generate_with_coordinates(self, frame, size=(256, 256)):
+    def _generate_with_coordinates(self, frame, size=(256, 256), outliers=None):
         """Populate an empty numpy array of size with zs
         elements at xs and ys coordinates"""
-        arr = np.zeros(size)
-        for x, y, z in frame:
-            arr.itemset((x, y), z)
+
+        arr = np.vstack(frame)
+        if outliers:
+            zs = arr.take(2, axis=1)
+            d = np.abs(zs - np.median(zs))
+            meds = np.median(d)
+            s = d / meds if meds else 0
+            return arr[s<outliers]
         return arr
 
     def _generate_basic_figure(self):
@@ -58,7 +63,9 @@ class GraphPlotter():
 
     def _write_heatmap_from_file(self, input_file, output=None):
         fig, ax, heatmap = self._gen_heatmap_from_file(input_file)
-        os.mkdir(os.path.dirname(input_file) + "/plots")
+        dname = os.path.dirname(input_file) + "/plots"
+        if not os.path.exists(dname):
+            os.mkdir(dname)
         self._write_heatmap(output or "{}/plots/{}.png".format(
             os.path.dirname(input_file), os.path.basename(input_file)),
             (fig, ax, heatmap))
@@ -89,6 +96,8 @@ class AppGraphPlotter():
         options, args = self._option_parser.parse_args(args)
         file_name = options.file_name or args[0]
 
+        if not os.path.dirname(file_name):
+            file_name = "{}/{}".format(os.getcwd(), file_name)
         # Assume heatmap for the moment
         figmap = self._plotter._gen_heatmap_from_file(file_name)
 

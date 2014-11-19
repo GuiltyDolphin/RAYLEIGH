@@ -7,7 +7,6 @@ import os
 import shutil
 import json
 
-#from matplotlib.testing.decorators import image_comparison
 import matplotlib
 
 from analysis import plotter
@@ -46,13 +45,16 @@ class TestFrameGraphing(unittest.TestCase):
         self.assertEqual(self.zs, arr_vals)
 
     def test_basic_figure_correct_labels(self):
-        self.assertEqual("Y coordinates", self.ax.get_ylabel())
-        self.assertEqual("X coordinates", self.ax.get_xlabel())
+        self.assertEqual("Y coordinate", self.ax.get_ylabel())
+        self.assertEqual("X coordinate", self.ax.get_xlabel())
 
     def test_basic_figure_correct_limits(self):
         expected = (0, 255)
         self.assertEqual(expected, self.ax.get_ylim())
         self.assertEqual(expected, self.ax.get_xlim())
+
+    def test_basic_figure_correct_aspect(self):
+        self.assertEqual('equal', self.ax.get_aspect())
 
     @unittest.skip
     def test_basic_heatmap_correct_data(self):
@@ -68,26 +70,3 @@ class TestFrameGraphing(unittest.TestCase):
         expected_contents = [os.path.basename(self.out_name)]
         actual = os.listdir(self.dir + "/plots")
         self.assertCountEqual(expected_contents, actual)
-
-
-#@image_comparison(baseline_images=['heatmap_test_graph'])
-#def test_basic_figure_heatmap_correct_axes():
-#    #fig = self.plotter._generate_basic_figure()
-#    xs = [1, 4, 7]
-#    ys = [2, 5, 8]
-#    zs = [3, 6, 9]
-#    plotter_ = plotter.GraphPlotter()
-#    heatmap_data = plotter_._generate_with_coordinates(xs, ys, zs)
-#    fig, ax, heatmap = plotter_._gen_heatmap(heatmap_data)
-#    #fig.savefig('tests/heatmap_test_graph')
-#    #fig, self.ax = plotter._generate_basic_figure()
-#    def can_generate_data_from_frame_file(self):
-#        self.assertEqual(self.plotter._gen_heatmap_data_from_frame(
-   # def test_can_produce_heatmap_from_file(self):
-   #     fig, ax, _ = self.plotter._gen_heatmap_from_file(self.in_file_frame.name)
-   #     actual = ax.gca().get_lines()[0]
-   #     fig2, _, _ = self.plotter._gen_heatmap(self.heatmap_data)
-   #     #expected = self.plotter._gen_heatmap(self.heatmap_data)
-   #     expected = fig2.gca().get_lines()[0]
-   #     self.assertEqual(actual, expected)
-

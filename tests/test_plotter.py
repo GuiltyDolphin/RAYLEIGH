@@ -151,6 +151,13 @@ class TestUserInteraction(unittest.TestCase):
         self.assertIsNone(option.default)
         self.assertEqual('Provide the file name to be read explicitly', option.help)
 
+    def test_provides_outliers_option(self):
+        """Provides the option to specify the value to be used for finding outliers"""
+        option = self.optparser.get_option('--outliers')
+        self.assertEqual('--outliers', option.get_opt_string())
+        self.assertIsNone(option.default)
+        self.assertEqual('Provide the value to be used when finding outliers', option.help)
+
     def test_accepts_single_files_and_writes(self):
         """The App can save the figure to a file when the write option is passed with a file name"""
         self.interface._run_with_args(self.test_args + [self.in_file_frame.name, '-w'])

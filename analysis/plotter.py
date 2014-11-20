@@ -29,6 +29,9 @@ class GraphPlotter():
             The generated numpy array
         """
         arr = np.vstack(frame)
+        xs, ys, zs  = arr.transpose()
+        zeros = np.zeros((256, 256))
+        zeros[(xs, ys)] = zs
         if outliers is not None:
             zs = arr.take(2, axis=1)
             d = np.abs(zs - np.median(zs))
@@ -80,7 +83,7 @@ class GraphPlotter():
         heatmap = ax.pcolormesh(data, cmap=plt.cm.Reds)
         return fig, ax, heatmap
 
-    def _gen_heatmap_from_file(self, file_name):
+    def _gen_heatmap_from_file(self, file_name, **kwargs):
         """Generate heatmap figure from a file
 
         Parameters
@@ -99,7 +102,7 @@ class GraphPlotter():
         """
         with open(file_name) as f:
             frame = json.load(f)
-        data = self._generate_with_coordinates(frame)
+        data = self._generate_with_coordinates(frame, **kwargs)
         return self._gen_heatmap(data)
 
     def _write_heatmap_from_file(self, input_file, output=None):
@@ -147,6 +150,10 @@ class AppGraphPlotter():
             help="Provide the file name to be read explicitly",
             default=None)
 
+        self._option_parser.add_option('--outliers',
+                help="Provide the value to be used when finding outliers",
+                default=None, type='int')
+
     def _run_with_args(self, args):
         """Carry out the sequence of IO actions that define the graph plotter.
 
@@ -165,10 +172,11 @@ class AppGraphPlotter():
         if not os.path.dirname(file_name):
             file_name = "{}/{}".format(os.getcwd(), file_name)
         # Assume heatmap for the moment
-        figmap = self._plotter._gen_heatmap_from_file(file_name)
+        figmap = self._plotter._gen_heatmap_from_file(file_name, outliers=options.outliers)
 
         if not options.no_view:
-            figmap[0].show()
+            plt.show()
+            #figmap[0].show()
 
         if options.write:
             self._plotter._write_heatmap_from_file(file_name)

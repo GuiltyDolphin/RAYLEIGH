@@ -11,12 +11,25 @@ from optparse import OptionParser
 
 
 class GraphPlotter():
-    def _generate_with_coordinates(self, frame, size=(256, 256), outliers=None):
-        """Populate an empty numpy array of size with zs
-        elements at xs and ys coordinates"""
+    def _generate_with_coordinates(self, frame, outliers=None):
+        """Generate a numpy array to be used for coordinate plotting.
 
+        Parameters
+        ----------
+        frame : (list-like (x, y, z))
+             The (x, y, z) values to be used in the array
+        outliers : (number)
+        Default : None
+             The value to be used when calculating outliers.
+             If the value is None then outliers will not be calculated.
+
+        Returns
+        -------
+        arr : (ndarray)
+            The generated numpy array
+        """
         arr = np.vstack(frame)
-        if outliers:
+        if outliers is not None:
             zs = arr.take(2, axis=1)
             d = np.abs(zs - np.median(zs))
             meds = np.median(d)
@@ -25,7 +38,19 @@ class GraphPlotter():
         return arr
 
     def _generate_basic_figure(self):
-        """Create a basic pre-configured figure for use with frame heatmaps"""
+        """Create a basic pre-configured figure for use with frame heatmaps
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        fig : (Figure)
+            The figure on which the axes lie
+        ax  : (Axes)
+            The axes associated with the plot
+        """
         fig, ax = plt.subplots()
         ax.set_ylabel("Y coordinate")
         ax.set_xlabel("X coordinate")
@@ -56,6 +81,22 @@ class GraphPlotter():
         return fig, ax, heatmap
 
     def _gen_heatmap_from_file(self, file_name):
+        """Generate heatmap figure from a file
+
+        Parameters
+        ----------
+        file_name : (string)
+             The name of the file to be read
+
+        Returns
+        -------
+        fig : (Figure)
+            The figure object
+        ax  : (Axes)
+            The axes object
+        heatmap : (Todo: Unknown)
+            The actual heatmap object
+        """
         with open(file_name) as f:
             frame = json.load(f)
         data = self._generate_with_coordinates(frame)
@@ -71,6 +112,20 @@ class GraphPlotter():
             (fig, ax, heatmap))
 
     def _write_heatmap(self, output_path, heatmap):
+        """Write the heatmap to the specified path
+
+        Parameters
+        ----------
+        output_path : (string)
+             The path for the heatmap to be saved to
+        heatmap : (Figure, Axes, heatmap)
+             The heatmap to be used for writing
+
+        Returns
+        -------
+        This function does not return
+        It is only useful for its side effects.
+        """
         fig, _, _ = heatmap
         fig.savefig(output_path)
 
@@ -93,6 +148,17 @@ class AppGraphPlotter():
             default=None)
 
     def _run_with_args(self, args):
+        """Carry out the sequence of IO actions that define the graph plotter.
+
+        Parameters
+        ----------
+        args : (list)
+             The arguments to be used for the run
+
+        Returns
+        -------
+        Nothing, this function is only useful for its side effects.
+        """
         options, args = self._option_parser.parse_args(args)
         file_name = options.file_name or args[0]
 

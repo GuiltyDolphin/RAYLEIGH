@@ -143,91 +143,80 @@ class FrameParser(object):
             self._parse_file_and_write(input_, out_file)
 
 
-def _setup_parser(usage=None):
-    parser = OptionParser(usage) if usage else OptionParser()
-    #parser.add_option("-f", "--input-file", dest="input_file",
-    #                  help="File to read cluster data from", metavar="FILE")
-    parser.add_option("-o", "--output-file", dest="output_file",
-                      help="File to write output to or STDOUT",
-                      default=None, metavar="FILE")
-    parser.add_option("-v", "--verbose", dest="verbose",
-                      help="Print status messages to STDOUT", default=False,
-                      action="store_true")
-    parser.add_option("-i", "--info", dest="info",
-                      help="Print additional information about process",
-                      default=False, action="store_true")
-    parser.add_option("--no-log", dest="log",
-                      action="store_false", default=False,
-                      help="Don't write to a log file")
-    parser.add_option("--log", dest="log_level", default="ERROR",
-                      help="Set the logging level")
-    parser.add_option("--log-file", dest="log_file",
-                      default="frame_parser.log",
-                      help="Specify the file to send log messages to")
-    return parser
+    #parser.add_option("-v", "--verbose", dest="verbose",
+    #                  help="Print status messages to STDOUT", default=False,
+    #                  action="store_true")
+    #parser.add_option("-i", "--info", dest="info",
+    #                  help="Print additional information about process",
+    #                  default=False, action="store_true")
+    #parser.add_option("--no-log", dest="log",
+    #                  action="store_false", default=False,
+    #                  help="Don't write to a log file")
+    #parser.add_option("--log", dest="log_level", default="ERROR",
+    #                  help="Set the logging level")
+    #parser.add_option("--log-file", dest="log_file",
+    #                  default="frame_parser.log",
+    #                  help="Specify the file to send log messages to")
+
+    #def _set_logger():
+    #    """Return a configured logger"""
+    #    time_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    #    log_level = getattr(logging, options.log_level.upper(), None)
+    #    if not isinstance(log_level, int):
+    #        raise ValueError("Invalid log level: {}".format(options.log_level))
+
+    #    logging.basicConfig(level=log_level,
+    #                        filename=options.log_file,
+    #                        format=time_format)
+
+    #    logger = logging.getLogger('cluster_parser')
+    #    logger.setLevel(log_level)
+
+    #    stream_level = getattr(
+    #        logging, "DEBUG" if options.verbose
+    #        else ("INFO" if options.info else "ERROR"),
+    #        None)
+    #    log_stdout = logging.StreamHandler()
+    #    log_stdout.setLevel(stream_level)
+    #    logger.addHandler(log_stdout)
+    #    return logger
 
 
-def _main(args=sys.argv[1:]):
-    option_parser = _setup_parser()
-    (options, args) = option_parser.parse_args(args)
+class AppFrameParser():
+    def __init__(self):
+        self._option_parser = OptionParser()
+        self._frame_parser = FrameParser()
 
-    if len(args) != 1:
-        print("wrong number of arguments: {}".format(len(args)))
-        sys.exit(2)
-    else:
-        options.input_file = args[0]
+        self._option_parser.add_option('-f', '--file-name',
+            help="Provide the file name to be read explicitly",
+            default=None)
 
-    def _set_logger():
-        """Return a configured logger"""
-        time_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-        log_level = getattr(logging, options.log_level.upper(), None)
-        if not isinstance(log_level, int):
-            raise ValueError("Invalid log level: {}".format(options.log_level))
+        self._option_parser.add_option("-o", "--output-file", dest="output_file",
+            help="File to write output to or STDOUT",
+            default=None, metavar="FILE")
 
-        logging.basicConfig(level=log_level,
-                            filename=options.log_file,
-                            format=time_format)
+    def _run_with_args(self, args):
+        """Carry out the sequence of IO actions that define the frame parser
 
-        logger = logging.getLogger('cluster_parser')
-        logger.setLevel(log_level)
+        Parameters
+        ----------
+        args : (list)
+             The arguments to be used for the run
 
-        stream_level = getattr(
-            logging, "DEBUG" if options.verbose
-            else ("INFO" if options.info else "ERROR"),
-            None)
-        log_stdout = logging.StreamHandler()
-        log_stdout.setLevel(stream_level)
-        logger.addHandler(log_stdout)
-        return logger
+        Returns
+        -------
+        Nothing, this function is only useful for its side effects.
+        """
+        options, args = self._option_parser.parse_args(args)
+        file_name = options.file_name or args[0]
 
-    ## Fix the logging section below
-    ## - The Debug may be removed until needed
-    ## - This section should probably be written in TDD
-    ##   style later on, to remove any UI bugs.
-    ##   - Figure out a good way to test the user's interaction
-    ##     with the application (and the graphing)
-    logger = _set_logger()
-    logger.setLevel(logging.DEBUG)  # This appears to fix logging?
+        if not file_name:
+            os.error("No filename specified")
 
-    parser = FrameParser()
-
-    logger.debug("Retrieving clusters...")
-    logger.debug("Running parsers, logging reduced...")
-    parser._detect_input_and_write(options.input_file, options.output_file)
-
-    #frame = parser._get_frame_from_file(options.input_file)
-
-    #logger.debug("Converting data to JSON format...")
-    #output_data = parser._gen_output_data(frame)
-    #logger.debug("Conversion complete")
-
-    #if options.output_file:
-    #    logger.debug("Writing to {}".format(options.output_file))
-    #else:
-    #    logger.debug("Writing to stdout...")
-
-    #parser._write_data(output_data, options.output_file)
+        if not os.path.dirname(file_name):
+            file_name = "{}/{}".format(os.getcwd(), file_name)
 
 
 if __name__ == '__main__':
-    _main()
+    app = AppFrameParser()
+    app._run_with_args(sys.argv[1:])

@@ -9,6 +9,7 @@ from optparse import OptionParser
 import logging
 from collections import deque
 import os
+import csv
 
 
 class FrameParser(object):
@@ -21,16 +22,13 @@ class FrameParser(object):
     def _retrieve_frame(self, data):
         """Retrieve frame from raw string"""
 
-        ## Might want to sort out the below two methods
-        ## - Might not be wise to have two unknown paths
-        ## within one function
         def retrieve_from_standard_data(frame):
             """Retrieve the frame from a standard data file"""
-            hits = deque()
-            hit_matcher = re.compile("(\d+)\s+(\d+)\s+(\d+)")
-            for hit in frame.splitlines():
-                hits.append(list(map(int, hit_matcher.search(hit).groups())))
-            return list(hits)
+            space_separated = type('space_sep', (),
+                {'delimiter': ' ', 'skipinitialspace': True,
+                 'quoting': csv.QUOTE_NONNUMERIC})
+            vals = csv.reader(frame.splitlines(), dialect=space_separated)
+            return list(vals)
 
         def retrieve_from_calibration(frames):
             """Retrieve the clusters from a calibration file"""
@@ -145,11 +143,6 @@ class FrameParser(object):
             self._parse_file_and_write(input_, out_file)
 
 
-#### COMMAND-LINE ####
-
-## Perhaps the CLI section should be moved into it's own class?
-## Also - Add better testing for this section - maybe even rewrite
-## it in TDD style
 def _setup_parser(usage=None):
     parser = OptionParser(usage) if usage else OptionParser()
     #parser.add_option("-f", "--input-file", dest="input_file",

@@ -6,7 +6,6 @@ import re
 import json
 import sys
 from optparse import OptionParser
-import logging
 from collections import deque
 import os
 import csv
@@ -27,6 +26,7 @@ class FrameParser(object):
             space_separated = type('space_sep', (),
                 {'delimiter': ' ', 'skipinitialspace': True,
                  'quoting': csv.QUOTE_NONNUMERIC})
+            frame = frame.replace('\t', ' ')
             vals = csv.reader(frame.splitlines(), dialect=space_separated)
             return list(vals)
 
@@ -215,6 +215,8 @@ class AppFrameParser():
 
         if not os.path.dirname(file_name):
             file_name = "{}/{}".format(os.getcwd(), file_name)
+
+        self._frame_parser._detect_input_and_write(file_name)
 
 
 if __name__ == '__main__':

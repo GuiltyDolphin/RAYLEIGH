@@ -10,6 +10,16 @@ import shutil
 import analysis.frame_parser as fp
 
 
+# Helper functions
+def get_base_names(files):
+    return [os.path.basename(f.name) for f in files]
+
+
+def get_expected_names(files):
+    names = get_base_names(files)
+    return [os.path.splitext(n)[0] + ".json" for n in names]
+
+
 class TestFrameParser(unittest.TestCase):
 
     """Tests for the frame_parser module"""
@@ -143,18 +153,11 @@ class TestDirectoryParsing(unittest.TestCase):
         os.remove(self.dsc_file.name)
         shutil.rmtree(self.dir)
 
-    def get_base_names(self, files):
-        return [os.path.basename(f.name) for f in files]
-
-    def get_expected_names(self, files):
-        names = self.get_base_names(files)
-        return [os.path.splitext(n)[0] + ".json" for n in names]
-
     def test_creates_suitable_directory_structure(self):
         """Creates a suitable directory structure"""
         self.parser._write_output_directory(self.dir)
-        name1, name2, name3 = self.get_base_names([self.in_file1, self.in_file2, self.dsc_file])
-        exp1, exp2 = self.get_expected_names([self.in_file1, self.in_file2])
+        name1, name2, name3 = get_base_names([self.in_file1, self.in_file2, self.dsc_file])
+        exp1, exp2 = get_expected_names([self.in_file1, self.in_file2])
         actual = os.listdir(self.dir)
         expected_contents = [name1, name2, name3, "output"]
         self.assertCountEqual(expected_contents, actual)
@@ -178,7 +181,7 @@ class TestDirectoryParsing(unittest.TestCase):
 
     def test_only_converts_files_with_specified_extension(self):
         """Only the files with the given extension are parsed"""
-        exp1, exp2 = self.get_expected_names([self.in_file1, self.in_file2])
+        exp1, exp2 = get_expected_names([self.in_file1, self.in_file2])
         self.parser._write_output_directory(self.dir)
         self.assertCountEqual([exp1, exp2, "frames.json"], os.listdir(self.dir + "/output"))
 
@@ -212,7 +215,7 @@ class TestDirectoryParsing(unittest.TestCase):
 
     def test_can_detect_and_write_to_output_dir(self):
         """Given an input string can determine that it is a directory and parse it accordingly"""
-        exp1, exp2 = self.get_expected_names([self.in_file1, self.in_file2])
+        exp1, exp2 = get_expected_names([self.in_file1, self.in_file2])
         self.parser._detect_input_and_write(self.dir)
         self.assertCountEqual([exp1, exp2, "frames.json"], os.listdir(self.dir + "/output"))
 
@@ -269,3 +272,11 @@ class TestUserInteraction(unittest.TestCase):
         self.assertEqual('--output-file', option.get_opt_string())
         self.assertIsNone(option.default)
         self.assertEqual('File to write output to or STDOUT', option.help)
+
+
+    def test_can_parse_directory(self):
+        """Can parse user file input and write"""
+        exp1, exp2 = get_expected_names([self.in_file1, self.in_file2])
+        self.interface._run_with_args(self.test_args + [self.dir])
+        self.assertCountEqual([exp1, exp2, "frames.json"], os.listdir(self.dir + "/output"))
+

@@ -241,6 +241,7 @@ class TestUserInteraction(unittest.TestCase):
         self.in_file2 = tempfile.NamedTemporaryFile(suffix="d01.txt", **file_options)
         file_options.update(suffix='.txt.dsc')
         self.dsc_file = tempfile.NamedTemporaryFile(**file_options)
+
         with open(self.in_file1.name, 'w') as f:
             f.write(self.text1)
         with open(self.in_file2.name, 'w') as f:
@@ -250,6 +251,7 @@ class TestUserInteraction(unittest.TestCase):
             base = os.path.basename(fname)
             new_name = os.path.splitext(base)[0] + ".json"
             return self.dir + "/output/" + new_name
+
         self.out_name1 = get_new_file_name(self.in_file1.name)
         self.out_name2 = get_new_file_name(self.in_file2.name)
 
@@ -261,18 +263,21 @@ class TestUserInteraction(unittest.TestCase):
 
     def test_provides_explicit_file_name_option(self):
         """Provides the option to specify filename explicitly"""
-        option = self.optparser.get_option('-f')
-        self.assertEqual('--file-name', option.get_opt_string())
-        self.assertIsNone(option.default)
-        self.assertEqual('Provide the file name to be read explicitly', option.help)
+        self.option_helper(
+            '-f', '--file-name',
+            None, 'Provide the file name to be read explicitly')
+
+    def option_helper(self, option_name, option_string, default, help):
+        option = self.optparser.get_option(option_name)
+        self.assertEqual(option_string, option.get_opt_string())
+        self.assertEqual(default, option.default)
+        self.assertEqual(help, option.help)
 
     def test_provides_explicit_output_file_option(self):
         """Provides the option to specify output filename explicitly"""
-        option = self.optparser.get_option('-o')
-        self.assertEqual('--output-file', option.get_opt_string())
-        self.assertIsNone(option.default)
-        self.assertEqual('File to write output to or STDOUT', option.help)
-
+        self.option_helper(
+            '-o', '--output-file',
+            None, 'File to write output to or STDOUT')
 
     def test_can_parse_directory(self):
         """Can parse user file input and write"""

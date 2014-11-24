@@ -129,34 +129,35 @@ class TestUserInteraction(unittest.TestCase):
         os.remove(self.in_file_frame.name)
         shutil.rmtree(self.dir)
 
+    def option_helper(self, option_name, option_string, default, help):
+        option = self.optparser.get_option(option_name)
+        self.assertEqual(option_string, option.get_opt_string())
+        self.assertEqual(default, option.default)
+        self.assertEqual(help, option.help)
+
     def test_provides_write_option(self):
         """Provides a write option"""
-        option = self.optparser.get_option('-w')
-        self.assertEqual('--write', option.get_opt_string())
-        self.assertFalse(option.default)
-        self.assertEqual('Write the graph to file', option.help)
-        self.assertTrue(self.interface._option_parser.has_option('-w'))
+        self.option_helper(
+            '-w', '--write',
+            False, 'Write the graph to file')
 
     def test_provides_no_view_option(self):
         """Provides a --no-view option"""
-        option = self.optparser.get_option('--no-view')
-        self.assertEqual('--no-view', option.get_opt_string())
-        self.assertEqual(False, option.default)
-        self.assertEqual('Do not view the graph - only useful in conjunction with other flags', option.help)
+        self.option_helper(
+            '--no-view', '--no-view',
+            False, 'Do not view the graph - only useful in conjunction with other flags')
 
     def test_provides_explicit_file_name_option(self):
         """Provides the option to specify filename explicitly"""
-        option = self.optparser.get_option('-f')
-        self.assertEqual('--file-name', option.get_opt_string())
-        self.assertIsNone(option.default)
-        self.assertEqual('Provide the file name to be read explicitly', option.help)
+        self.option_helper(
+            '-f', '--file-name',
+            None, 'Provide the file name to be read explicitly')
 
     def test_provides_outliers_option(self):
         """Provides the option to specify the value to be used for finding outliers"""
-        option = self.optparser.get_option('--outliers')
-        self.assertEqual('--outliers', option.get_opt_string())
-        self.assertIsNone(option.default)
-        self.assertEqual('Provide the value to be used when finding outliers', option.help)
+        self.option_helper(
+            '--outliers', '--outliers',
+            None, 'Provide the value to be used when finding outliers')
 
     def test_accepts_single_files_and_writes(self):
         """The App can save the figure to a file when the write option is passed with a file name"""

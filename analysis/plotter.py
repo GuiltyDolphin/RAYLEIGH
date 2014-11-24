@@ -100,8 +100,10 @@ class GraphPlotter():
         heatmap : (Todo: Unknown)
             The actual heatmap object
         """
+        def fltint(x):
+            return int(float(x))
         with open(file_name) as f:
-            frame = json.load(f)
+            frame = json.load(f, parse_float=fltint)
         data = self._generate_with_coordinates(frame, **kwargs)
         return self._gen_heatmap(data)
 

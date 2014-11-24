@@ -14,12 +14,14 @@ If errors occur whilst attempting to install
 the dependencies, try the same command prepended
 with 'sudo'.
 
-numpy      >= 1.9.0
 matplotlib >= 1.4.2
+nose       >= 1.3.4
+numpy      >= 1.9.0
+setuptools >= 6.0.2
 
 # Usage
 
-Use 'python3' to run the commands.
+Use 'python3 [command_name] [options]' to run the commands.
 
 ## Examples:
 
@@ -56,6 +58,7 @@ Options:
                         File to write output to or STDOUT
 
 ## Plotter
+
 Usage: plotter.py [options]
 
 Options:

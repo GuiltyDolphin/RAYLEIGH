@@ -158,30 +158,6 @@ class FrameParser(object):
     #                  default="frame_parser.log",
     #                  help="Specify the file to send log messages to")
 
-    #def _set_logger():
-    #    """Return a configured logger"""
-    #    time_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    #    log_level = getattr(logging, options.log_level.upper(), None)
-    #    if not isinstance(log_level, int):
-    #        raise ValueError("Invalid log level: {}".format(options.log_level))
-
-    #    logging.basicConfig(level=log_level,
-    #                        filename=options.log_file,
-    #                        format=time_format)
-
-    #    logger = logging.getLogger('cluster_parser')
-    #    logger.setLevel(log_level)
-
-    #    stream_level = getattr(
-    #        logging, "DEBUG" if options.verbose
-    #        else ("INFO" if options.info else "ERROR"),
-    #        None)
-    #    log_stdout = logging.StreamHandler()
-    #    log_stdout.setLevel(stream_level)
-    #    logger.addHandler(log_stdout)
-    #    return logger
-
-
 class AppFrameParser():
     def __init__(self):
         self._option_parser = OptionParser()

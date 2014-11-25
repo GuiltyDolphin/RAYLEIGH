@@ -9,6 +9,7 @@ import json
 
 import matplotlib
 import numpy as np
+import numpy.ma as ma
 
 from analysis import plotter
 
@@ -18,10 +19,8 @@ class TestFrameGraphing(unittest.TestCase):
     """Tests for graph output from the Graph Plotter"""
 
     def setUp(self):
-        self.xyz = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
-        self.xs = [1, 4, 7]
-        self.ys = [2, 5, 8]
-        self.zs = [3, 6, 9]
+        self.xyz = np.random.random_integers(1, 255, (10, 3))
+        self.xs, self.ys, self.zs = self.xyz.transpose()
         self.plotter = plotter.GraphPlotter()
         self.fig, self.ax = self.plotter._generate_basic_figure()
         self.heatmap_data = self.plotter._generate_with_coordinates(self.xyz)
@@ -29,7 +28,7 @@ class TestFrameGraphing(unittest.TestCase):
         self.dir = tempfile.mkdtemp()
         self.in_file_frame = tempfile.NamedTemporaryFile(delete=False, dir=self.dir)
         with open(self.in_file_frame.name, 'w') as f:
-            f.write(json.dumps(self.xyz))
+            f.write(json.dumps(self.xyz.tolist()))
 
         def get_new_file_name(fname):
             base = os.path.basename(fname)
@@ -43,8 +42,8 @@ class TestFrameGraphing(unittest.TestCase):
 
     def test_inserts_elements_at_correct_indices(self):
         """The coordinate array converter correctly places z values"""
-        arr_vals = list(self.heatmap_data.take(2, axis=1))
-        self.assertEqual(self.zs, arr_vals)
+        arr_vals = self.heatmap_data.compressed()
+        np.testing.assert_array_equal(self.zs.sort(), arr_vals.sort())
 
     def test_basic_figure_correct_labels(self):
         """The x and y labels are properly configured for the basic figure"""
@@ -82,16 +81,13 @@ class TestFrameGraphing(unittest.TestCase):
 
     def test_can_determine_outliers(self):
         """The coordinate array converter can correcly determine outliers given the outlier value"""
-        outliers = 1
         frame = np.random.randint(0, 255, (20, 3))
         vals = frame.take(2, axis=1)
-        d = np.abs(vals - np.median(vals))
-        meds = np.median(d)
-        s = d / meds if meds else 0
-        new_frame = frame[s<outliers]
+        outliers = 1
+        d_max = np.abs(vals - vals.mean()) / vals.std()
+        new_frame = ma.masked_array(vals, mask=d_max>=outliers)
         arr = self.plotter._generate_with_coordinates(frame, outliers=outliers)
-        np.testing.assert_array_equal(new_frame, arr)
-
+        np.testing.assert_array_equal(new_frame.compressed().sort(), arr.compressed().sort())
 
 
 class TestUserInteraction(unittest.TestCase):

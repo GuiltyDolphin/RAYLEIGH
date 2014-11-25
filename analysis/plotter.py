@@ -4,6 +4,7 @@
 from matplotlib import pyplot as plt
 
 import numpy as np
+import numpy.ma as ma
 import json
 import os
 import sys
@@ -32,13 +33,13 @@ class GraphPlotter():
         xs, ys, zs  = arr.transpose()
         zeros = np.zeros((256, 256))
         zeros[(xs, ys)] = zs
+        zmask = ma.masked_array(zeros, mask=zeros == 0)
+
+        # Use Chauvenet's criterion to find the outliers
         if outliers is not None:
-            zs = arr.take(2, axis=1)
-            d = np.abs(zs - np.median(zs))
-            meds = np.median(d)
-            s = d / meds if meds else 0
-            return arr[s<outliers]
-        return arr
+            d_max = np.abs(zmask - zmask.mean()) / zmask.std()
+            return ma.masked_array(zmask, mask=d_max>=outliers)
+        return zmask
 
     def _generate_basic_figure(self):
         """Create a basic pre-configured figure for use with frame heatmaps
@@ -154,7 +155,7 @@ class AppGraphPlotter():
 
         self._option_parser.add_option('--outliers',
                 help="Provide the value to be used when finding outliers",
-                default=None, type='int')
+                default=None, type='float')
 
     def _run_with_args(self, args):
         """Carry out the sequence of IO actions that define the graph plotter.

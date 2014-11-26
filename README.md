@@ -15,8 +15,11 @@ the dependencies, try the same command prepended
 with 'sudo'.
 
 matplotlib >= 1.4.2
+
 nose       >= 1.3.4
+
 numpy      >= 1.9.0
+
 setuptools >= 6.0.2
 
 # Usage

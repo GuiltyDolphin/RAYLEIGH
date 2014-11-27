@@ -109,6 +109,20 @@ class GraphPlotter():
         return self._gen_heatmap(data)
 
     def _write_heatmap_from_file(self, input_file, output=None):
+        """Read a file and write a heatmap image
+
+        Parameters
+        ----------
+        input_file : (string)
+             The name of the file to be read
+        output     : (string)
+             The path to write the heatmap to - will save to a plots folder
+             if not specified
+
+        Returns
+        -------
+        Nothing - Used for side effects
+        """
         fig, ax, heatmap = self._gen_heatmap_from_file(input_file)
         dname = os.path.dirname(input_file) + "/plots"
         if not os.path.exists(dname):

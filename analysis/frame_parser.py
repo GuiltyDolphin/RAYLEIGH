@@ -19,7 +19,22 @@ class FrameParser(object):
         """TODO: to be defined1. """
 
     def _retrieve_frame(self, data):
-        """Retrieve frame from raw string"""
+        """Retrieve frame from a string of data
+
+        Parameters
+        ----------
+        data : (string)
+             The data to be parsed - this may
+             be valid calibration or standard
+             frame data.
+
+        Returns
+        -------
+        frame : ([[Numeric, Numeric, Numeric]])
+              The frame as a list of [x, y, c] hits, where
+              x is the x-coordinate, y is the y-coordinate and
+              c is the intensity of the hit.
+        """
 
         def retrieve_from_standard_data(frame):
             """Retrieve the frame from a standard data file"""
@@ -71,7 +86,18 @@ class FrameParser(object):
                 f.write(data)
 
     def _is_calibration_data(self, data):
-        """Determine whether some data is valid calibration data"""
+        """Determine whether some data is valid calibration data
+
+        Parameters
+        ----------
+        data : (string)
+             The data that may be calibration or standard.
+
+        Returns
+        -------
+        result : (Boolean)
+             Whether or not the data is calibration data.
+        """
         return "Frame" in data
 
     def _write_output_directory(self, directory, extension=".txt"):

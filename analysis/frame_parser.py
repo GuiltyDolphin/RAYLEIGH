@@ -73,7 +73,18 @@ class FrameParser(object):
         return self._retrieve_frame(contents)
 
     def _gen_output_data(self, data):
-        """Generate the JSON representation of the data"""
+        """Generate the JSON representation of the data
+
+        Parameters
+        ----------
+        data : (JSON serializable array)
+             The data to be serialised
+
+        Returns
+        -------
+        result : (String)
+             The JSON serialised string
+        """
         json_format = {'indent': 2}
         return json.dumps(data, **json_format)
 

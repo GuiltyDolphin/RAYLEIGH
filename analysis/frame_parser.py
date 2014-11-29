@@ -188,6 +188,21 @@ class FrameParser(object):
             f.write(json.dumps(frames, indent=2))
 
     def _parse_file_and_write(self, in_file, out_file=None):
+        """Perform the JSON conversion on a single file
+
+        Parameters
+        ----------
+        in_file : (string)
+             Path to the file to be read
+        out_file : (string), optional
+             The path to write the output data to.
+             The default (None) will cause the output to be written to STDOUT.
+
+        Returns
+        -------
+        output_data (string)
+          The resulting parsed data as a JSON string.
+        """
         frame = self._get_frame_from_file(in_file)
         output_data = self._gen_output_data(frame)
         self._write_data(output_data, out_file)

@@ -89,7 +89,21 @@ class FrameParser(object):
         return json.dumps(data, **json_format)
 
     def _write_data(self, data, path=None):
-        """Write the JSON data to a file or stdout"""
+        """Write the JSON data to a file or stdout
+
+        Parameters
+        ----------
+        data : (string)
+             The data to be written to a file.
+        path : (string), optional
+             The path that the data will be written to.
+             The default (None) causes the data to be written
+             to STDOUT.
+
+        Returns
+        -------
+        Nothing - Used for side-effects.
+        """
         if path is None:
             print("Writing to STDOUT currently disabled due to large datasets")
         else:
@@ -112,7 +126,21 @@ class FrameParser(object):
         return "Frame" in data
 
     def _write_output_directory(self, directory, extension=".txt"):
-        """Write output to specified directory"""
+        """Parse a directory and write to output directory
+
+        Parameters
+        ----------
+        directory : (string)
+             Path to a directory that the datafiles will be read from
+        extension : (string), optional
+             The file extension that determines the files to be read.
+             The default (".txt") causes files within the directory that
+             have the extension '.txt' to be parsed.
+
+        Returns
+        -------
+        Nothing - Used for side-effects.
+        """
 
         def add_extension(fname, extension):
             """Append the extension to the file name"""

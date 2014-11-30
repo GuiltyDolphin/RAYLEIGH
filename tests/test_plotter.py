@@ -27,7 +27,10 @@ class TestFrameGraphing(unittest.TestCase):
 
         self.dir = tempfile.mkdtemp()
         self.in_file_frame = tempfile.NamedTemporaryFile(delete=False, dir=self.dir)
+        self.in_file_frame2 = tempfile.NamedTemporaryFile(delete=False, dir=self.dir)
         with open(self.in_file_frame.name, 'w') as f:
+            f.write(json.dumps(self.xyz.tolist()))
+        with open(self.in_file_frame2.name, 'w') as f:
             f.write(json.dumps(self.xyz.tolist()))
 
         def get_new_file_name(fname):
@@ -35,9 +38,11 @@ class TestFrameGraphing(unittest.TestCase):
             new_name = os.path.splitext(base)[0] + ".png"
             return self.dir + "/plots/" + new_name
         self.out_name = get_new_file_name(self.in_file_frame.name)
+        self.out_name2 = get_new_file_name(self.in_file_frame2.name)
 
     def tearDown(self):
         os.remove(self.in_file_frame.name)
+        os.remove(self.in_file_frame2.name)
         shutil.rmtree(self.dir)
 
     def test_inserts_elements_at_correct_indices(self):
@@ -88,6 +93,21 @@ class TestFrameGraphing(unittest.TestCase):
         new_frame = ma.masked_array(vals, mask=d_max>=outliers)
         arr = self.plotter._generate_with_coordinates(frame, outliers=outliers)
         np.testing.assert_array_equal(new_frame.compressed().sort(), arr.compressed().sort())
+
+    def test_basic_figure_correct_number_axes(self):
+        fig, axes = self.plotter._generate_basic_figure(5)
+        self.assertEqual((2, 3), axes.shape)
+
+    def test_basic_figure_hides_correct_axes(self):
+        fig, axes = self.plotter._generate_basic_figure(10)
+        for x in [(-1, -1), (-1, -2)]:
+            self.assertFalse(axes[x].axison)
+
+    def test_can_read_multiple_files(self):
+        file_names = [self.in_file_frame.name, self.in_file_frame2.name]
+        exp_data = np.array([self.heatmap_data, self.heatmap_data])
+        data = self.plotter._gen_multi_from_files(file_names)
+        np.testing.assert_array_equal(exp_data, data)
 
 
 class TestUserInteraction(unittest.TestCase):
@@ -154,6 +174,12 @@ class TestUserInteraction(unittest.TestCase):
         self.option_helper(
             '--outliers', '--outliers',
             None, 'Provide the value to be used when finding outliers')
+
+    def test_provides_multi_plot_option(self):
+        """Provides the option to specify multiple frames to be plotted on a single figure"""
+        self.option_helper(
+            '--single-figure', '--single-figure',
+            True, 'Plot all the frames on a single figure')
 
     def test_accepts_single_files_and_writes(self):
         """The App can save the figure to a file when the write option is passed with a file name"""

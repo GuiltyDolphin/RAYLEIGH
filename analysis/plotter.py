@@ -5,10 +5,12 @@ from matplotlib import pyplot as plt
 
 import numpy as np
 import numpy.ma as ma
+
 import json
+import math
+from optparse import OptionParser
 import os
 import sys
-from optparse import OptionParser
 
 
 class GraphPlotter():
@@ -30,7 +32,7 @@ class GraphPlotter():
             The generated numpy array
         """
         arr = np.vstack(frame)
-        xs, ys, zs  = arr.transpose()
+        xs, ys, zs = arr.transpose()
         zeros = np.zeros((256, 256))
         zeros[(xs, ys)] = zs
         zmask = ma.masked_array(zeros, mask=zeros == 0)
@@ -38,10 +40,10 @@ class GraphPlotter():
         # Use Chauvenet's criterion to find the outliers
         if outliers is not None:
             d_max = np.abs(zmask - zmask.mean()) / zmask.std()
-            return ma.masked_array(zmask, mask=d_max>=outliers)
+            return ma.masked_array(zmask, mask=d_max >= outliers)
         return zmask
 
-    def _generate_basic_figure(self):
+    def _generate_basic_figure(self, num=1):
         """Create a basic pre-configured figure for use with frame heatmaps
 
         Parameters
@@ -55,13 +57,73 @@ class GraphPlotter():
         ax  : (Axes)
             The axes associated with the plot
         """
-        fig, ax = plt.subplots()
-        ax.set_ylabel("Y coordinate")
-        ax.set_xlabel("X coordinate")
-        ax.set_ylim((0, 255))
-        ax.set_xlim((0, 255))
-        ax.set_aspect('equal')
+        def get_shape(num):
+            x = round(math.sqrt(num))
+            y = math.ceil(num / x)
+            return (x, y)
+
+        rows, cols = get_shape(num)
+        fig, ax = plt.subplots(rows, cols)
+        try:
+            base_axis = ax[0][0]
+        except TypeError:
+            base_axis = ax
+        if type(ax) == np.ndarray:
+            for axis in ax.flatten():
+                axis.set_ylim((0, 255))
+                axis.set_xlim((0, 255))
+                axis.set_aspect('equal')
+            fig.subplots_adjust(hspace=0.45, wspace=0.45)
+            num_to_turn_off = (rows * cols) - num
+            for x in range(1, num_to_turn_off+1):
+                ax[-1][-x].axis('off')
+        base_axis.set_ylabel("Y coordinate")
+        base_axis.set_xlabel("X coordinate")
+        base_axis.set_ylim((0, 255))
+        base_axis.set_xlim((0, 255))
+        base_axis.set_aspect('equal')
         return fig, ax
+
+    def _gen_multi_plots(self, frames):
+        fig, axes = self._generate_basic_figure(len(frames))
+        heatmaps = []
+        x, y = axes.shape
+        c = 0
+        for i in range(x):
+            for j in range(y):
+                ax = axes[i][j]
+                if ax.axison:
+                    heatmaps.append(
+                        ax.pcolormesh(frames[c], cmap='Reds'))
+                    c += 1
+        return fig, axes, heatmaps
+
+    def _gen_multi_from_files(self, file_names, outliers=None):
+        data = []
+
+        def fltint(x):
+            return int(float(x))
+
+        for file_name in file_names:
+            with open(file_name) as f:
+                loaded_data = json.load(f, parse_float=fltint)
+                data.append(
+                    self._generate_with_coordinates(
+                        loaded_data, outliers=outliers))
+        return np.array(data)
+
+    def _read_and_generate_heatmaps(self, file_names, outliers=None):
+        frames = self._gen_multi_from_files(file_names, outliers=outliers)
+        return self._gen_multi_plots(frames)
+
+    def _write_multi(self, files, output=None):
+        fig, ax, heatmap = self._read_and_generate_heatmaps(files)
+        dname = os.path.dirname(files[0]) + "/plots"
+        if not os.path.exists(dname):
+            os.mkdir(dname)
+        self._write_heatmap(output or "{}/plots/{}.png".format(
+            os.path.dirname(files[0]), os.path.basename(files[0])),
+            (fig, ax, heatmap))
 
     def _gen_heatmap(self, data):
         """Generate a heatmap figure
@@ -155,21 +217,31 @@ class AppGraphPlotter():
         self._option_parser = OptionParser()
         self._plotter = GraphPlotter()
 
-        self._option_parser.add_option('-w', '--write',
+        self._option_parser.add_option(
+            '-w', '--write',
             help="Write the graph to file",
             default=False, action='store_true')
 
-        self._option_parser.add_option('--no-view',
-            help="Do not view the graph - only useful in conjunction with other flags",
+        self._option_parser.add_option(
+            '--no-view',
+            help=("Do not view the graph - "
+                  "only useful in conjunction with other flags"),
             default=False, action='store_true')
 
-        self._option_parser.add_option('-f', '--file-name',
+        self._option_parser.add_option(
+            '-f', '--file-name',
             help="Provide the file name to be read explicitly",
-            default=None)
+            default=None, action='append')
 
-        self._option_parser.add_option('--outliers',
-                help="Provide the value to be used when finding outliers",
-                default=None, type='float')
+        self._option_parser.add_option(
+            '--outliers',
+            help="Provide the value to be used when finding outliers",
+            default=None, type='float')
+
+        self._option_parser.add_option(
+            '--single-figure',
+            help="Plot all the frames on a single figure",
+            default=True, action='store_true')
 
     def _run_with_args(self, args):
         """Carry out the sequence of IO actions that define the graph plotter.
@@ -184,19 +256,45 @@ class AppGraphPlotter():
         Nothing, this function is only useful for its side effects.
         """
         options, args = self._option_parser.parse_args(args)
-        file_name = options.file_name or args[0]
+        files = []
+        try:
+            files.append(args[0])
+        except IndexError:
+            pass
+        try:
+            files.extend(options.file_name)
+        except TypeError:
+            pass
+        #file_name = options.file_name or args[0]
 
-        if not os.path.dirname(file_name):
-            file_name = "{}/{}".format(os.getcwd(), file_name)
-        # Assume heatmap for the moment
-        figmap = self._plotter._gen_heatmap_from_file(file_name, outliers=options.outliers)
+        if len(files) > 1:
+            file_names = []
+            for name in files:
+                if not os.path.dirname(name):
+                    file_names.append("{}/{}".format(os.getcwd(), name))
+                else:
+                    file_names.append(name)
+            if options.single_figure:
+                self._plotter._read_and_generate_heatmaps(
+                    file_names, outliers=options.outliers)
+
+            if options.write:
+                self._plotter._write_multi(file_names)
+        else:
+            file_name = files[0]
+            if not os.path.dirname(file_name):
+                file_name = "{}/{}".format(os.getcwd(), file_name)
+            # Assume heatmap for the moment
+            figmap = self._plotter._gen_heatmap_from_file(
+                file_name, outliers=options.outliers)
+
+            if options.write:
+                self._plotter._write_heatmap_from_file(file_name)
 
         if not options.no_view:
             plt.show()
-            #figmap[0].show()
-
-        if options.write:
-            self._plotter._write_heatmap_from_file(file_name)
+        else:
+            plt.close()
 
 
 if __name__ == '__main__':

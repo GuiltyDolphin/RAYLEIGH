@@ -113,6 +113,21 @@ class GraphPlotter():
         return np.array(data)
 
     def _read_and_generate_heatmaps(self, file_names, outliers=None):
+        """Read multiple files and generate subplots
+
+        Parameters
+        ----------
+        file_names : (list (string))
+             The paths of the files to be read
+        outliers   : (float)
+             The value to be used in outlier calculations
+
+        Returns
+        -------
+        (Figure, [Axes], [heatmap])
+        The figure and associated subplot axes, along with
+        the list of heatmaps generated.
+        """
         frames = self._gen_multi_from_files(file_names, outliers=outliers)
         return self._gen_multi_plots(frames)
 

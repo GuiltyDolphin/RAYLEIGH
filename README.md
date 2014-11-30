@@ -117,4 +117,5 @@ Options:
   -f FILE_NAME, --file-name=FILE_NAME
                         Provide the file name to be read explicitly
   --outliers=OUTLIERS   Provide the value to be used when finding outliers
+  --single-figure       Plot all the frames on a single figure
 ```

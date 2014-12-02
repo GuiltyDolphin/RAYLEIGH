@@ -63,25 +63,29 @@ class GraphPlotter():
             return (x, y)
 
         rows, cols = get_shape(num)
+        if cols > 1 and rows == 1:
+            rows = 2
         fig, ax = plt.subplots(rows, cols)
-        try:
-            base_axis = ax[0][0]
-        except TypeError:
-            base_axis = ax
+
+        def set_limits_aspect(axis):
+            axis.set_ylim((0, 255))
+            axis.set_xlim((0, 255))
+            axis.set_aspect('equal')
+
         if type(ax) == np.ndarray:
+            base_axis = ax[0][0]
             for axis in ax.flatten():
-                axis.set_ylim((0, 255))
-                axis.set_xlim((0, 255))
-                axis.set_aspect('equal')
+                set_limits_aspect(axis)
             fig.subplots_adjust(hspace=0.45, wspace=0.45)
             num_to_turn_off = (rows * cols) - num
             for x in range(1, num_to_turn_off+1):
                 ax[-1][-x].axis('off')
+        else:
+            base_axis = ax
+
         base_axis.set_ylabel("Y coordinate")
         base_axis.set_xlabel("X coordinate")
-        base_axis.set_ylim((0, 255))
-        base_axis.set_xlim((0, 255))
-        base_axis.set_aspect('equal')
+        set_limits_aspect(base_axis)
         return fig, ax
 
     def _gen_multi_plots(self, frames):

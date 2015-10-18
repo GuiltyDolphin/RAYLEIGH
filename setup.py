@@ -4,15 +4,14 @@
 
 from setuptools import setup, find_packages
 
+import analysis
+
 setup(
     name='RAYLEIGH',
-    version="0.2.0",
+    version=analysis.__version__,
     packages=find_packages(),
-    scripts=[
-        'analysis/frame_parser.py',
-        'analysis/plotter.py',
-        'analysis/dsc_parser.py'],
-
+    # scripts=['analysis/rayleigh.py'],
+    entry_points={'console_scripts': ['rayleigh = analysis.rayleigh:main']},
     install_requires=[
         'matplotlib>=1.4.2', 'nose>=1.3.4',
         'numpy>=1.9.0', 'setuptools>=6.0.2'],
@@ -23,8 +22,13 @@ setup(
     + " TimePix chips.",
     license="GPLv3",
     keywords="plotter ray rayleigh json converter",
+    classifiers=[
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 3",
+        "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+        "Operating System :: POSIX :: Linux"],
     url="https://www.github.com/GuiltyDolphin/RAYLEIGH",
-    download_url="https://github.com/GuiltyDolphin/RAYLEIGH/archive/master.zip",
+    #download_url="https://github.com/GuiltyDolphin/RAYLEIGH/archive/master.zip",
 
     test_suite='nose.collector'
     )

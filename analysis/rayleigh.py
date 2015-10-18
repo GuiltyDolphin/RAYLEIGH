@@ -8,8 +8,8 @@ import sys
 
 from matplotlib import pyplot as plt
 
-import frame_parser
-import plotter
+from analysis import frame_parser
+from analysis import plotter
 
 
 class RayleighApp():
@@ -19,6 +19,8 @@ class RayleighApp():
         self._parser = argparse.ArgumentParser(
             description="Perform operations on framedata from TimePix chips",
             prog='rayleigh')
+
+        self._parser.set_defaults(func=None)
 
         self._parser.add_argument(
             '--version',
@@ -124,9 +126,15 @@ class RayleighApp():
 
     def _run(self, args):
         args_ = self._parser.parse_args(args)
+        if args_.func is None:
+            print("No command specified, use 'rayleigh --help' to see a complete list")
+            sys.exit(1)
         args_.func(args_)
 
 
-if __name__ == '__main__':
+def main():
     app = RayleighApp()
     app._run(sys.argv[1:])
+
+if __name__ == '__main__':
+    main()

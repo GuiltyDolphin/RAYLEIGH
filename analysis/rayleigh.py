@@ -55,37 +55,6 @@ class RayleighApp():
             help="File to write output to",
             default=None, metavar="FILE")
 
-        parser_plot = subparsers.add_parser(
-            'plot',
-            help="Plot json representations of frames")
-        parser_plot.set_defaults(func=run_parser_plot)
-
-        parser_plot.add_argument(
-            '-w', '--write',
-            help="Write the graph to file",
-            default=False, action='store_true')
-
-        parser_plot.add_argument(
-            '--no-view',
-            help=("Do not view the graph - "
-                  "only useful in conjunction with other flags"),
-            default=False, action='store_true', dest='no_view')
-
-        parser_plot.add_argument(
-            'files',
-            help="Files to be read",
-            default=None,
-            action='append')
-        # parser_plot.add_argument(
-        #     '-f', '--file-name',
-        #     help="Provide the file name to be read explicitly",
-        #     default=None, action='append')
-
-        parser_plot.add_argument(
-            '--outliers',
-            help="Provide the value to be used when finding outliers",
-            default=None, type='float')
-
         def run_parser_plot(args):
             files = args.files
 
@@ -111,7 +80,7 @@ class RayleighApp():
                 figmap = plotter_._gen_heatmap_from_file(
                     file_name, outliers=args.outliers)
 
-                if options.write:
+                if args.write:
                     plotter_._write_heatmap_from_file(file_name)
 
             if not args.no_view:
@@ -119,19 +88,37 @@ class RayleighApp():
             else:
                 plt.close()
 
+        parser_plot = subparsers.add_parser(
+            'plot',
+            help="Plot json representations of frames")
+        parser_plot.set_defaults(func=run_parser_plot)
+
+        parser_plot.add_argument(
+            '-w', '--write',
+            help="Write the graph to file",
+            default=False, action='store_true')
+
+        parser_plot.add_argument(
+            '--no-view',
+            help=("Do not view the graph - "
+                  "only useful in conjunction with other flags"),
+            default=False, action='store_true', dest='no_view')
+
+        parser_plot.add_argument(
+            'files',
+            help="Files to be read",
+            default=None,
+            nargs='*')
+
+        parser_plot.add_argument(
+            '--outliers',
+            help="Provide the value to be used when finding outliers",
+            default=None, type=float, metavar='FLOAT')
+
         parser_plot.add_argument(
             '--single-figure',
             help="Plot all the frames on a single figure",
             default=True, action='store_true')
-
-        parser_help = subparsers.add_parser(
-            'help',
-            help="Display help for a command")
-
-        parser_help.add_argument(
-            'command',
-            help="Command to show help for",
-            choices=['plot', 'help', 'frame'])
 
     def _run(self, args):
         args_ = self._parser.parse_args(args)

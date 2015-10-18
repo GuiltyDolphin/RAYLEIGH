@@ -30,10 +30,12 @@ class RayleighApp():
         frame_parser_ = frame_parser.FrameParser()
 
         def run_parser_frame(args):
-            fname = args.frame
-            if not os.path.dirname(fname):
-                fname = "{}/{}".format(os.getcwd(), fname)
-            frame_parser_._detect_input_and_write(fname)
+            fname = args.file
+            file_name = os.path.realpath(fname)
+            if not os.path.exists(file_name):
+                print("No such file or directory: {}".format(fname))
+                sys.exit(1)
+            frame_parser_._detect_input_and_write(file_name)
 
         parser_frame = subparsers.add_parser(
             'frame',
@@ -61,6 +63,7 @@ class RayleighApp():
 
     def _run(self, args):
         args_ = self._parser.parse_args(args)
+        args_.func(args_)
 
 
 if __name__ == '__main__':

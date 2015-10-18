@@ -63,7 +63,9 @@ class RayleighApp():
                 if not os.path.exists(full):
                     print("No such file or directory {}".format(fname))
                     sys.exit(1)
-
+                if os.path.isdir(full):
+                    print("{} is a directory")
+                    sys.exit(1)
                 return full
             file_names = list(map(check_file, files))
 
@@ -118,7 +120,7 @@ class RayleighApp():
         parser_plot.add_argument(
             '--single-figure',
             help="Plot all the frames on a single figure",
-            default=True, action='store_true')
+            default=False, action='store_true')
 
     def _run(self, args):
         args_ = self._parser.parse_args(args)

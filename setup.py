@@ -24,6 +24,7 @@ setup(
     license="MIT",
     keywords="plotter ray rayleigh json converter",
     url="https://www.github.com/GuiltyDolphin/RAYLEIGH",
+    download_url="https://github.com/GuiltyDolphin/RAYLEIGH/archive/master.zip",
 
     test_suite='nose.collector'
     )

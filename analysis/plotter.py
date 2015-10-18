@@ -8,9 +8,7 @@ import numpy.ma as ma
 
 import json
 import math
-from optparse import OptionParser
 import os
-import sys
 
 
 class GraphPlotter():
@@ -229,93 +227,3 @@ class GraphPlotter():
         """
         fig, _, _ = heatmap
         fig.savefig(output_path)
-
-
-class AppGraphPlotter():
-    def __init__(self):
-        self._option_parser = OptionParser()
-        self._plotter = GraphPlotter()
-
-        self._option_parser.add_option(
-            '-w', '--write',
-            help="Write the graph to file",
-            default=False, action='store_true')
-
-        self._option_parser.add_option(
-            '--no-view',
-            help=("Do not view the graph - "
-                  "only useful in conjunction with other flags"),
-            default=False, action='store_true')
-
-        self._option_parser.add_option(
-            '-f', '--file-name',
-            help="Provide the file name to be read explicitly",
-            default=None, action='append')
-
-        self._option_parser.add_option(
-            '--outliers',
-            help="Provide the value to be used when finding outliers",
-            default=None, type='float')
-
-        self._option_parser.add_option(
-            '--single-figure',
-            help="Plot all the frames on a single figure",
-            default=True, action='store_true')
-
-    def _run_with_args(self, args):
-        """Carry out the sequence of IO actions that define the graph plotter.
-
-        Parameters
-        ----------
-        args : (list)
-             The arguments to be used for the run
-
-        Returns
-        -------
-        Nothing, this function is only useful for its side effects.
-        """
-        options, args = self._option_parser.parse_args(args)
-        files = []
-        try:
-            files.append(args[0])
-        except IndexError:
-            pass
-        try:
-            files.extend(options.file_name)
-        except TypeError:
-            pass
-        #file_name = options.file_name or args[0]
-
-        if len(files) > 1:
-            file_names = []
-            for name in files:
-                if not os.path.dirname(name):
-                    file_names.append("{}/{}".format(os.getcwd(), name))
-                else:
-                    file_names.append(name)
-            if options.single_figure:
-                self._plotter._read_and_generate_heatmaps(
-                    file_names, outliers=options.outliers)
-
-            if options.write:
-                self._plotter._write_multi(file_names)
-        else:
-            file_name = files[0]
-            if not os.path.dirname(file_name):
-                file_name = "{}/{}".format(os.getcwd(), file_name)
-            # Assume heatmap for the moment
-            figmap = self._plotter._gen_heatmap_from_file(
-                file_name, outliers=options.outliers)
-
-            if options.write:
-                self._plotter._write_heatmap_from_file(file_name)
-
-        if not options.no_view:
-            plt.show()
-        else:
-            plt.close()
-
-
-if __name__ == '__main__':
-    app = AppGraphPlotter()
-    app._run_with_args(sys.argv[1:])

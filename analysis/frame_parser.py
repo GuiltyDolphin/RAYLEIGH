@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# cluster_parser.py
+# frame_parser.py
 
 import re
 import json

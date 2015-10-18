@@ -5,7 +5,6 @@
 import re
 import json
 import sys
-from optparse import OptionParser
 from collections import deque
 import os
 import csv
@@ -88,7 +87,7 @@ class FrameParser(object):
         json_format = {'indent': 2}
         return json.dumps(data, **json_format)
 
-    def _write_data(self, data, path=None):
+    def _write_data(self, data, path):
         """Write the JSON data to a file or stdout
 
         Parameters
@@ -104,11 +103,8 @@ class FrameParser(object):
         -------
         Nothing - Used for side-effects.
         """
-        if path is None:
-            print("Writing to STDOUT currently disabled due to large datasets")
-        else:
-            with open(path, 'w') as f:
-                f.write(data)
+        with open(path, 'w') as f:
+            f.write(data)
 
     def _is_calibration_data(self, data):
         """Determine whether some data is valid calibration data
@@ -203,9 +199,10 @@ class FrameParser(object):
         output_data (string)
           The resulting parsed data as a JSON string.
         """
+        to_write = out_file or os.path.splitext(in_file)[0] + '.json'
         frame = self._get_frame_from_file(in_file)
         output_data = self._gen_output_data(frame)
-        self._write_data(output_data, out_file)
+        self._write_data(output_data, to_write)
         return output_data
 
     def _input_type(self, input_):
@@ -221,60 +218,3 @@ class FrameParser(object):
             self._write_output_directory(input_)
         elif type_ == "file":
             self._parse_file_and_write(input_, out_file)
-
-
-    #parser.add_option("-v", "--verbose", dest="verbose",
-    #                  help="Print status messages to STDOUT", default=False,
-    #                  action="store_true")
-    #parser.add_option("-i", "--info", dest="info",
-    #                  help="Print additional information about process",
-    #                  default=False, action="store_true")
-    #parser.add_option("--no-log", dest="log",
-    #                  action="store_false", default=False,
-    #                  help="Don't write to a log file")
-    #parser.add_option("--log", dest="log_level", default="ERROR",
-    #                  help="Set the logging level")
-    #parser.add_option("--log-file", dest="log_file",
-    #                  default="frame_parser.log",
-    #                  help="Specify the file to send log messages to")
-
-class AppFrameParser():
-    def __init__(self):
-        self._option_parser = OptionParser()
-        self._frame_parser = FrameParser()
-
-        self._option_parser.add_option('-f', '--file-name',
-            help="Provide the file name to be read explicitly",
-            default=None)
-
-        self._option_parser.add_option("-o", "--output-file", dest="output_file",
-            help="File to write output to or STDOUT",
-            default=None, metavar="FILE")
-
-    def _run_with_args(self, args):
-        """Carry out the sequence of IO actions that define the frame parser
-
-        Parameters
-        ----------
-        args : (list)
-             The arguments to be used for the run
-
-        Returns
-        -------
-        Nothing, this function is only useful for its side effects.
-        """
-        options, args = self._option_parser.parse_args(args)
-        file_name = options.file_name or args[0]
-
-        if not file_name:
-            os.error("No filename specified")
-
-        if not os.path.dirname(file_name):
-            file_name = "{}/{}".format(os.getcwd(), file_name)
-
-        self._frame_parser._detect_input_and_write(file_name)
-
-
-if __name__ == '__main__':
-    app = AppFrameParser()
-    app._run_with_args(sys.argv[1:])

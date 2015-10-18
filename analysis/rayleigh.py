@@ -31,11 +31,13 @@ class RayleighApp():
 
         def run_parser_frame(args):
             fname = args.file
+            outname = args.output_file
+            out_file = os.path.realpath(outname) if outname else None
             file_name = os.path.realpath(fname)
             if not os.path.exists(file_name):
                 print("No such file or directory: {}".format(fname))
                 sys.exit(1)
-            frame_parser_._detect_input_and_write(file_name)
+            frame_parser_._detect_input_and_write(file_name, out_file)
 
         parser_frame = subparsers.add_parser(
             'frame',
@@ -44,8 +46,13 @@ class RayleighApp():
 
         parser_frame.add_argument(
             "file",
-            help="File to be converted",
+            help="File or directory to be converted",
             default=None)
+
+        parser_frame.add_argument(
+            "-o", "--output-file", dest="output_file",
+            help="File to write output to",
+            default=None, metavar="FILE")
 
         parser_plot = subparsers.add_parser(
             'plot',

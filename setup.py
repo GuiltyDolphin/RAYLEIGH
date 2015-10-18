@@ -6,7 +6,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='RAYLEIGH',
-    version="0.1.0",
+    version="0.2.0",
     packages=find_packages(),
     scripts=[
         'analysis/frame_parser.py',
@@ -21,7 +21,7 @@ setup(
     author_email="GuiltyDolphin@gmail.com",
     description="A basic plotter and converter for output files from"
     + " TimePix chips.",
-    license="MIT",
+    license="GPLv3",
     keywords="plotter ray rayleigh json converter",
     url="https://www.github.com/GuiltyDolphin/RAYLEIGH",
     download_url="https://github.com/GuiltyDolphin/RAYLEIGH/archive/master.zip",

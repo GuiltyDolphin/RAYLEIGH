@@ -47,11 +47,11 @@ class TestInterfacePlotter(unittest.TestCase):
         os.remove(self.in_file_frame.name)
         shutil.rmtree(self.dir)
 
-    def option_helper(self, option_name, option_string, default, help):
-        option = self.optparser.get_option(option_name)
-        self.assertEqual(option_string, option.get_opt_string())
-        self.assertEqual(default, option.default)
-        self.assertEqual(help, option.help)
+    # def option_helper(self, option_name, option_string, default, help):
+    #     option = self.optparser.get_option(option_name)
+    #     self.assertEqual(option_string, option.get_opt_string())
+    #     self.assertEqual(default, option.default)
+    #     self.assertEqual(help, option.help)
 
     def test_provides_write_option(self):
         """Provides a write option"""
@@ -72,15 +72,17 @@ class TestInterfacePlotter(unittest.TestCase):
 
     def test_provides_explicit_file_name_option(self):
         """Provides the option to specify filename explicitly"""
-        self.option_helper(
-            '-f', '--file-name',
-            None, 'Provide the file name to be read explicitly')
+        self.assertEqual(None, self.plotparser.get_default('file_names'))
+        # self.option_helper(
+        #     '-f', '--file-name',
+        #     None, 'Provide the file name to be read explicitly')
 
     def test_provides_outliers_option(self):
         """Provides the option to specify the value to be used for finding outliers"""
-        self.option_helper(
-            '--outliers', '--outliers',
-            None, 'Provide the value to be used when finding outliers')
+        self.assertEqual(None, self.plotparser.get_default('outliers'))
+        # self.option_helper(
+        #     '--outliers', '--outliers',
+        #     None, 'Provide the value to be used when finding outliers')
 
     def test_provides_multi_plot_option(self):
         """Provides the option to specify multiple frames to be plotted on a single figure"""
@@ -91,7 +93,7 @@ class TestInterfacePlotter(unittest.TestCase):
 
     def test_accepts_single_files_and_writes(self):
         """The App can save the figure to a file when the write option is passed with a file name"""
-        self.interface._run(self.test_args + [self.in_file_frame.name, '-w'])
+        self.interface._run(['plot'] + self.test_args + [self.in_file_frame.name, '-w'])
         expected_contents = [os.path.basename(self.out_name)]
         actual = os.listdir(self.dir + "/plots")
         self.assertCountEqual(expected_contents, actual)

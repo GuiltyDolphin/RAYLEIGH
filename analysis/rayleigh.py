@@ -25,7 +25,7 @@ class RayleighApp():
         self._parser.add_argument(
             '--version',
             action='version',
-            version='0.2.0')
+            version='rayleigh 0.2.0')
 
         subparsers = self._parser.add_subparsers(
             title="commands")

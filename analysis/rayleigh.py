@@ -20,7 +20,7 @@ class RayleighApp():
             description="Perform operations on framedata from TimePix chips",
             prog='rayleigh')
 
-        self._parser.set_defaults(func=None)
+        # self._parser.set_defaults(func=no_func)
 
         self._parser.add_argument(
             '--version',
@@ -85,7 +85,7 @@ class RayleighApp():
                     file_name, outliers=args.outliers)
 
                 if args.write:
-                    plotter_._write_heatmap_from_file(file_name)
+                    self._plotter._write_heatmap_from_file(file_name)
 
             if not args.no_view:
                 plt.show()
@@ -126,10 +126,14 @@ class RayleighApp():
 
     def _run(self, args):
         args_ = self._parser.parse_args(args)
-        if args_.func is None:
-            print("No command specified, use 'rayleigh --help' to see a complete list")
+        try:
+            args_.func(args_)
+        except AttributeError:
+            print(
+                "No command specified, "
+                + "use 'rayleigh --help' to see a complete list")
             sys.exit(1)
-        args_.func(args_)
+
 
 
 def main():

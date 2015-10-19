@@ -30,7 +30,7 @@ class RayleighApp():
         subparsers = self._parser.add_subparsers(
             title="commands")
 
-        frame_parser_ = frame_parser.FrameParser()
+        self._frame_parser = frame_parser.FrameParser()
 
         def run_parser_frame(args):
             fname = args.file
@@ -40,19 +40,19 @@ class RayleighApp():
             if not os.path.exists(file_name):
                 print("No such file or directory: {}".format(fname))
                 sys.exit(1)
-            frame_parser_._detect_input_and_write(file_name, out_file)
+            self._frame_parser._detect_input_and_write(file_name, out_file)
 
-        parser_frame = subparsers.add_parser(
+        self._parser_frame = subparsers.add_parser(
             'frame',
             help="Frame parser for converting frame files to json")
-        parser_frame.set_defaults(func=run_parser_frame)
+        self._parser_frame.set_defaults(func=run_parser_frame)
 
-        parser_frame.add_argument(
+        self._parser_frame.add_argument(
             "file",
             help="File or directory to be converted",
             default=None)
 
-        parser_frame.add_argument(
+        self._parser_frame.add_argument(
             "-o", "--output-file", dest="output_file",
             help="File to write output to",
             default=None, metavar="FILE")

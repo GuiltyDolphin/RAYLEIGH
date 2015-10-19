@@ -7,7 +7,6 @@ import os
 import shutil
 import json
 
-import matplotlib
 import numpy as np
 import numpy.ma as ma
 
@@ -26,8 +25,10 @@ class TestFrameGraphing(unittest.TestCase):
         self.heatmap_data = self.plotter._generate_with_coordinates(self.xyz)
 
         self.dir = tempfile.mkdtemp()
-        self.in_file_frame = tempfile.NamedTemporaryFile(delete=False, dir=self.dir)
-        self.in_file_frame2 = tempfile.NamedTemporaryFile(delete=False, dir=self.dir)
+        self.in_file_frame = tempfile.NamedTemporaryFile(
+            delete=False, dir=self.dir)
+        self.in_file_frame2 = tempfile.NamedTemporaryFile(
+            delete=False, dir=self.dir)
         with open(self.in_file_frame.name, 'w') as f:
             f.write(json.dumps(self.xyz.tolist()))
         with open(self.in_file_frame2.name, 'w') as f:
@@ -85,14 +86,15 @@ class TestFrameGraphing(unittest.TestCase):
         self.assertCountEqual(expected_contents, actual)
 
     def test_can_determine_outliers(self):
-        """The coordinate array converter can correcly determine outliers given the outlier value"""
+        """The coordinate array converter can correcly determine outliers"""
         frame = np.random.randint(0, 255, (20, 3))
         vals = frame.take(2, axis=1)
         outliers = 1
         d_max = np.abs(vals - vals.mean()) / vals.std()
-        new_frame = ma.masked_array(vals, mask=d_max>=outliers)
+        new_frame = ma.masked_array(vals, mask=d_max >= outliers)
         arr = self.plotter._generate_with_coordinates(frame, outliers=outliers)
-        np.testing.assert_array_equal(new_frame.compressed().sort(), arr.compressed().sort())
+        np.testing.assert_array_equal(
+            new_frame.compressed().sort(), arr.compressed().sort())
 
     def test_basic_figure_correct_number_axes(self):
         fig, axes = self.plotter._generate_basic_figure(5)

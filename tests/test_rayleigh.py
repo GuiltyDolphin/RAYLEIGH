@@ -41,7 +41,8 @@ class TestInterfacePlotter(unittest.TestCase):
         self.heatmap_data = self.plotter._generate_with_coordinates(self.xyz)
 
         self.dir = tempfile.mkdtemp()
-        self.in_file_frame = tempfile.NamedTemporaryFile(delete=False, dir=self.dir)
+        self.in_file_frame = tempfile.NamedTemporaryFile(
+            delete=False, dir=self.dir)
         with open(self.in_file_frame.name, 'w') as f:
             f.write(json.dumps(self.xyz))
 
@@ -57,49 +58,25 @@ class TestInterfacePlotter(unittest.TestCase):
         os.remove(self.in_file_frame.name)
         shutil.rmtree(self.dir)
 
-    # def option_helper(self, option_name, option_string, default, help):
-    #     option = self.optparser.get_option(option_name)
-    #     self.assertEqual(option_string, option.get_opt_string())
-    #     self.assertEqual(default, option.default)
-    #     self.assertEqual(help, option.help)
-
-    def test_provides_write_option(self):
-        """Provides a write option"""
+    def test_default_write_option(self):
+        """Writing will not be performed by default"""
         self.assertEqual(False, self.plotparser.get_default('write'))
-        # self.option_helper(
-        #     '-w', '--write',
-        #     False, 'Write the graph to file')
 
-    def test_sets_default_no_view_option(self):
-        """Provides a --no-view option"""
+    def test_no_view_default(self):
+        """By default the plot will be displayed"""
         self.assertEqual(False, self.plotparser.get_default('no_view'))
 
-    ## def test_provides_no_view_option(self):
-    ##     """Provides a --no-view option"""
-        # self.option_helper(
-        #     '--no-view', '--no-view',
-        #     False, 'Do not view the graph - only useful in conjunction with other flags')
-
-    def test_provides_explicit_file_name_option(self):
-        """Provides the option to specify filename explicitly"""
+    def test_no_default_input_file(self):
+        """There is no default input file"""
         self.assertEqual(None, self.plotparser.get_default('file_names'))
-        # self.option_helper(
-        #     '-f', '--file-name',
-        #     None, 'Provide the file name to be read explicitly')
 
-    def test_provides_outliers_option(self):
-        """Provides the option to specify the value to be used for finding outliers"""
+    def test_no_default_outliers(self):
+        """By default there is no outlier boundary"""
         self.assertEqual(None, self.plotparser.get_default('outliers'))
-        # self.option_helper(
-        #     '--outliers', '--outliers',
-        #     None, 'Provide the value to be used when finding outliers')
 
-    def test_provides_multi_plot_option(self):
-        """Provides the option to specify multiple frames to be plotted on a single figure"""
+    def test_default_multi_plot_option(self):
+        """By default will not plot on single figure"""
         self.assertEqual(False, self.plotparser.get_default('single_figure'))
-        # self.option_helper(
-        #     '--single-figure', '--single-figure',
-        #     True, 'Plot all the frames on a single figure')
 
     def test_accepts_single_files_and_writes(self):
         """The App can save the figure to a file when the write option is passed with a file name"""

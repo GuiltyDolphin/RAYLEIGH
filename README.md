@@ -1,7 +1,13 @@
+# RAYLEIGH
+
+A plotter and file converter for output files from TimePix chips.
+
 # Installation
-Currently no installation is required, as long as the dependencies
-have been fulfilled the scripts can be run as described in the 'usage'
-section.
+
+In the directory with `setup.py`, run `python3 setup.py install`. If the
+script should only be installed for the current user, run
+`python3 setup.py install --user`.
+
 
 
 ## Source
@@ -10,7 +16,7 @@ The source code can be found on
 
 ## License
 
-RAYLEIGH is licensed under the MIT license.
+RAYLEIGH is licensed under GPLv3.
 See the LICENSE file for more information.
 
 ## Dependencies
@@ -34,7 +40,9 @@ setuptools >= 6.0.2
 
 # Usage
 
-Use `python3 [command_name] [options]` to run the commands.
+`rayleigh [options] <command> {arguments}`
+
+Use `rayleigh --help` for an overview of the commands.
 
 ## Examples:
 
@@ -51,7 +59,7 @@ the contents of these files is valid output data).
 
 ### Using the frame parser:
 
-    python3 path/to/frame_parser.py frames
+    rayleigh frame frames
 
 Results in the same directory as before, but containing
 an additional directory called 'output', that in turn contains
@@ -72,10 +80,10 @@ three files: 'data00.json', 'data01.json' and 'frames.json'.
 
 After running the above example and moving into the output directory.
 
-    python3 path/to/plotter.py data00.json -w --no-view
+    rayleigh plot data00.json -w --no-view
 
 Results in a directory called 'plots' that contains a file called
-'data00.txt.png'.
+'data00.json.png'.
 
 ```
 /toplevel
@@ -87,35 +95,18 @@ Results in a directory called 'plots' that contains a file called
           data01.json
           frames.json
           /plots
-              data00.txt.png
+              data00.json.png
 ```
 
 
 ## Frame Parser
 
-```
-Usage: frame_parser.py [options]
+Usage: `rayleigh frame [options] frames..`
 
-Options:
-  -h, --help            show this help message and exit
-  -f FILE_NAME, --file-name=FILE_NAME
-                        Provide the file name to be read explicitly
-  -o FILE, --output-file=FILE
-                        File to write output to or STDOUT
-```
+Use `rayleigh frame --help` for the option summary.
 
 ## Plotter
 
-```
-Usage: plotter.py [options]
+Usage: `rayleigh plot [options] frames..`
 
-Options:
-  -h, --help            show this help message and exit
-  -w, --write           Write the graph to file
-  --no-view             Do not view the graph - only useful in conjunction
-                        with other flags
-  -f FILE_NAME, --file-name=FILE_NAME
-                        Provide the file name to be read explicitly
-  --outliers=OUTLIERS   Provide the value to be used when finding outliers
-  --single-figure       Plot all the frames on a single figure
-```
+Use `rayleigh plot --help` for the option summary.

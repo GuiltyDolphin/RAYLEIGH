@@ -69,10 +69,6 @@ class TestFrameParser(unittest.TestCase):
         with open(self.out_file.name) as f:
             self.assertEqual(expected, json.loads(f.read()))
 
-    def test_can_recognise_file_input(self):
-        """Can determine if the input string represents a filename"""
-        self.assertEqual("file", fp._input_type(self.in_file_frame.name))
-
 
 class TestDirectoryParsing(unittest.TestCase):
     """Tests regarding multiple files for the FrameParser"""
@@ -168,10 +164,6 @@ class TestDirectoryParsing(unittest.TestCase):
         fp._write_output_directory(self.dir)
         with open(self.dir + "/output/frames.json") as f:
             self.assertEqual(expected, json.loads(f.read()))
-
-    def test_can_automatically_detect_directories(self):
-        """Can determine that the input string represents a directory path"""
-        self.assertEqual("directory", fp._input_type(self.dir))
 
     def test_can_detect_and_write_to_output_dir(self):
         """Can detect and write to directories"""

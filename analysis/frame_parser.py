@@ -5,17 +5,18 @@
 import re
 import json
 import sys
-from collections import deque
 import os
 import csv
 
 
 def _detect_input_and_write(input_, out_file=None):
-    type_ = _input_type(input_)
-    if type_ == "directory":
+    if os.path.isdir(input_):
         _write_output_directory(input_)
-    elif type_ == "file":
+    elif os.path.isfile(input_):
         _parse_file_and_write(input_, out_file)
+    else:
+        raise FileNotFoundError(
+            "Not a valid file or directory: {}".format(input_))
 
 
 def _write_data(data, path):
@@ -36,14 +37,6 @@ def _write_data(data, path):
     """
     with open(path, 'w') as f:
         f.write(data)
-
-
-def _input_type(input_):
-    if os.path.isdir(input_):
-        return "directory"
-    elif os.path.isfile(input_):
-        return "file"
-    raise FileError("Could not recognize input type")
 
 
 def _gen_output_data(data):

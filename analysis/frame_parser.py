@@ -142,14 +142,14 @@ def _write_output_directory(directory, extension=".txt"):
         """Get a list of the (files) that match the extension in directory"""
         def with_dir(files):
             """Prepend the directory path to each of the files in file"""
-            return map(lambda x: directory + "/" + x, files)
+            return [directory + '/' + x for x in files]
 
         def with_extension(files):
             """Get a filtered list of files matching the file extension"""
-            return filter(lambda x: os.path.splitext(x)[1] == ext, files)
+            return [x for x in files if os.path.splitext(x)[1] == ext]
 
         return with_extension(
-            filter(os.path.isfile, with_dir(os.listdir(directory))))
+            [x for x in with_dir(os.listdir(directory)) if os.path.isfile(x)])
 
     os.mkdir(directory + "/output/")
 

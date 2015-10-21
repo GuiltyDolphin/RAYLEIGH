@@ -25,18 +25,6 @@ class TestFrameParser(unittest.TestCase):
     """Tests for the frame_parser module"""
 
     def setUp(self):
-        self.cluster_text = """
-        Frame 1: Frame 1 (1336049775.586539 s, 0.03 s) \n
-        [6, 0, 200] [7, 0, 61]\n
-        [44, 0, 119] \n
-        [203, 0, 172] [204, 0, 81] \n
-        [208, 0, 82] [209, 0, 117] [209, 1, 127] [208, 1, 2] \n
-        [99, 1, 133] \n
-        \n
-        Frame 2 (1336049775.7117825 s, 0.03 s)\n
-        [54, 0, 108] [54, 1, 43] [55, 1, 115] \n
-        [123, 0, 76] [124, 0, 59] [124, 1, 142] [123, 1, 84] \n
-        [156, 0, 24] \n"""
         self.frame_data = """77 56  28
         7   57  61
         7   58  74
@@ -46,49 +34,18 @@ class TestFrameParser(unittest.TestCase):
         21  85  60
         21  86  41"""
 
-        self.in_file_calibration = tempfile.NamedTemporaryFile(delete=False)
         self.in_file_frame = tempfile.NamedTemporaryFile(delete=False)
         self.out_file = tempfile.NamedTemporaryFile(delete=False)
-        with open(self.in_file_calibration.name, 'w') as f:
-            f.write(self.cluster_text)
         with open(self.in_file_frame.name, 'w') as f:
             f.write(self.frame_data)
 
     def tearDown(self):
-        os.remove(self.in_file_calibration.name)
         os.remove(self.out_file.name)
         os.remove(self.in_file_frame.name)
 
     def get_hits(self, text=None):
         """Helper - Get the hits from frame"""
         return fp._retrieve_frame(text or self.cluster_text)
-
-    def test_can_correctly_retrieve_data_from_calibration_file(self):
-        """Can retrieve data from calibration file"""
-        expected = self.get_hits()
-        actual = fp._get_frame_from_file(self.in_file_calibration.name)
-        self.assertEqual(expected, actual)
-
-    def test_can_convert_calibration_to_json(self):
-        """Calibration data can be converted to JSON"""
-        data = self.get_hits()
-        expected_json_data = json.loads(json.dumps(data))
-        actual_json_data = json.loads(fp._gen_output_data(data))
-        self.assertEqual(expected_json_data, actual_json_data)
-
-    def test_output_calibration_data_written_correctly_to_file(self):
-        """Calibration data can be written to file"""
-        clusters = self.get_hits()
-        data = fp._gen_output_data(clusters)
-        expected = json.loads(data)
-        fp._write_data(data, self.out_file.name)
-        with open(self.out_file.name) as f:
-            self.assertEqual(expected, json.loads(f.read()))
-
-    def test_can_recognise_calibration_data(self):
-        """Calibration data and standard data can be recognized"""
-        self.assertTrue(fp._is_calibration_data(self.cluster_text))
-        self.assertFalse(fp._is_calibration_data(self.frame_data))
 
     def test_can_correctly_retrieve_data_from_file(self):
         """Data can be retrieved from standard data files"""

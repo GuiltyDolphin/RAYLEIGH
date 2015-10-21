@@ -18,22 +18,6 @@ def _detect_input_and_write(input_, out_file=None):
         _parse_file_and_write(input_, out_file)
 
 
-def _is_calibration_data(data):
-    """Determine whether some data is valid calibration data
-
-    Parameters
-    ----------
-    data : (string)
-            The data that may be calibration or standard.
-
-    Returns
-    -------
-    result : (Boolean)
-            Whether or not the data is calibration data.
-    """
-    return "Frame" in data
-
-
 def _write_data(data, path):
     """Write the JSON data to a file or stdout
 
@@ -85,9 +69,7 @@ def _retrieve_frame(data):
     Parameters
     ----------
     data : (string)
-            The data to be parsed - this may
-            be valid calibration or standard
-            frame data.
+            The data to be parsed.
 
     Returns
     -------
@@ -97,35 +79,15 @@ def _retrieve_frame(data):
             c is the intensity of the hit.
     """
 
-    def retrieve_from_standard_data(frame):
-        """Retrieve the frame from a standard data file"""
-        space_separated = type('space_sep', (),
-            {'delimiter': ' ', 'skipinitialspace': True,
-                'quoting': csv.QUOTE_NONNUMERIC})
-        frame = frame.replace('\t', ' ')
-        vals = csv.reader(frame.splitlines(), dialect=space_separated)
-        return list(vals)
-
-    def retrieve_from_calibration(frames):
-        """Retrieve the clusters from a calibration file"""
-        hits = []
-        hit_matcher = re.compile("(\[(?:\d+, )+\d+\])")
-        for frame in frames:
-            for hit_set in frame.splitlines():
-                hits.extend(
-                    map(json.loads, hit_matcher.findall(hit_set)))
-        return hits
-
-    if _is_calibration_data(data):
-        def _safe_remove(ls, c):
-            if c in ls:
-                ls.remove(c)
-
-        frames = re.split("Frame.*\n", data)
-        _safe_remove(frames, '')
-        return retrieve_from_calibration(frames)
-    else:
-        return retrieve_from_standard_data(data)
+    space_separated = type(
+        'space_sep', (),
+        {
+            'delimiter': ' ',
+            'skipinitialspace': True,
+            'quoting': csv.QUOTE_NONNUMERIC})
+    frame = data.replace('\t', ' ')
+    vals = csv.reader(frame.splitlines(), dialect=space_separated)
+    return list(vals)
 
 
 def _get_frame_from_file(file_name):

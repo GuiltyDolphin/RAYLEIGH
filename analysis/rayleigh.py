@@ -8,7 +8,7 @@ import sys
 
 from matplotlib import pyplot as plt
 
-from analysis import frame_parser
+from analysis import frame_parser as fp
 from analysis import plotter
 
 
@@ -30,8 +30,6 @@ class RayleighApp():
         subparsers = self._parser.add_subparsers(
             title="commands")
 
-        self._frame_parser = frame_parser.FrameParser()
-
         def run_parser_frame(args):
             fname = args.file
             outname = args.output_file
@@ -40,7 +38,7 @@ class RayleighApp():
             if not os.path.exists(file_name):
                 print("No such file or directory: {}".format(fname))
                 sys.exit(1)
-            self._frame_parser._detect_input_and_write(file_name, out_file)
+            fp._detect_input_and_write(file_name, out_file)
 
         self._parser_frame = subparsers.add_parser(
             'frame',

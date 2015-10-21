@@ -46,7 +46,6 @@ class TestFrameParser(unittest.TestCase):
         21  85  60
         21  86  41"""
 
-        self.parser = fp.FrameParser()
         self.in_file_calibration = tempfile.NamedTemporaryFile(delete=False)
         self.in_file_frame = tempfile.NamedTemporaryFile(delete=False)
         self.out_file = tempfile.NamedTemporaryFile(delete=False)
@@ -62,67 +61,66 @@ class TestFrameParser(unittest.TestCase):
 
     def get_hits(self, text=None):
         """Helper - Get the hits from frame"""
-        return self.parser._retrieve_frame(text or self.cluster_text)
+        return fp._retrieve_frame(text or self.cluster_text)
 
     def test_can_correctly_retrieve_data_from_calibration_file(self):
         """Can retrieve data from calibration file"""
         expected = self.get_hits()
-        actual = self.parser._get_frame_from_file(self.in_file_calibration.name)
+        actual = fp._get_frame_from_file(self.in_file_calibration.name)
         self.assertEqual(expected, actual)
 
     def test_can_convert_calibration_to_json(self):
         """Calibration data can be converted to JSON"""
         data = self.get_hits()
         expected_json_data = json.loads(json.dumps(data))
-        actual_json_data = json.loads(self.parser._gen_output_data(data))
+        actual_json_data = json.loads(fp._gen_output_data(data))
         self.assertEqual(expected_json_data, actual_json_data)
 
     def test_output_calibration_data_written_correctly_to_file(self):
         """Calibration data can be written to file"""
         clusters = self.get_hits()
-        data = self.parser._gen_output_data(clusters)
+        data = fp._gen_output_data(clusters)
         expected = json.loads(data)
-        self.parser._write_data(data, self.out_file.name)
+        fp._write_data(data, self.out_file.name)
         with open(self.out_file.name) as f:
             self.assertEqual(expected, json.loads(f.read()))
 
     def test_can_recognise_calibration_data(self):
         """Calibration data and standard data can be recognized"""
-        self.assertTrue(self.parser._is_calibration_data(self.cluster_text))
-        self.assertFalse(self.parser._is_calibration_data(self.frame_data))
+        self.assertTrue(fp._is_calibration_data(self.cluster_text))
+        self.assertFalse(fp._is_calibration_data(self.frame_data))
 
     def test_can_correctly_retrieve_data_from_file(self):
         """Data can be retrieved from standard data files"""
         expected = self.get_hits(self.frame_data)
-        actual = self.parser._get_frame_from_file(self.in_file_frame.name)
+        actual = fp._get_frame_from_file(self.in_file_frame.name)
         self.assertEqual(expected, actual)
 
     def test_can_convert_frame_data_to_json(self):
         """Standard input data can be converted to JSON"""
         data = self.get_hits(self.frame_data)
         expected_json_data = json.loads(json.dumps(data))
-        actual_json_data = json.loads(self.parser._gen_output_data(data))
+        actual_json_data = json.loads(fp._gen_output_data(data))
         self.assertEqual(expected_json_data, actual_json_data)
 
     def test_output_frame_data_written_correctly_to_file(self):
         """Standard data can be written to a file"""
         clusters = self.get_hits(self.frame_data)
-        data = self.parser._gen_output_data(clusters)
+        data = fp._gen_output_data(clusters)
         expected = json.loads(data)
-        self.parser._write_data(data, self.out_file.name)
+        fp._write_data(data, self.out_file.name)
         with open(self.out_file.name) as f:
             self.assertEqual(expected, json.loads(f.read()))
 
     def test_can_recognise_file_input(self):
         """Can determine if the input string represents a filename"""
-        self.assertEqual("file", self.parser._input_type(self.in_file_frame.name))
+        self.assertEqual("file", fp._input_type(self.in_file_frame.name))
 
 
 class TestDirectoryParsing(unittest.TestCase):
     """Tests regarding multiple files for the FrameParser"""
 
     def setUp(self):
-        self.parser = fp.FrameParser()
         self.text1 = """1 2 3
         4 5 6
         7 8 9"""
@@ -155,7 +153,7 @@ class TestDirectoryParsing(unittest.TestCase):
 
     def test_creates_suitable_directory_structure(self):
         """Creates a suitable directory structure"""
-        self.parser._write_output_directory(self.dir)
+        fp._write_output_directory(self.dir)
         name1, name2, name3 = get_base_names([self.in_file1, self.in_file2, self.dsc_file])
         exp1, exp2 = get_expected_names([self.in_file1, self.in_file2])
         actual = os.listdir(self.dir)
@@ -170,7 +168,7 @@ class TestDirectoryParsing(unittest.TestCase):
 
     def test_creates_files_with_correct_contents(self):
         """The output files have the correct contents"""
-        self.parser._write_output_directory(self.dir)
+        fp._write_output_directory(self.dir)
         expect1, expect2 = self.get_expected_data()
         with open(self.out_name1) as f:
             actual1 = json.loads(f.read())
@@ -182,7 +180,7 @@ class TestDirectoryParsing(unittest.TestCase):
     def test_only_converts_files_with_specified_extension(self):
         """Only the files with the given extension are parsed"""
         exp1, exp2 = get_expected_names([self.in_file1, self.in_file2])
-        self.parser._write_output_directory(self.dir)
+        fp._write_output_directory(self.dir)
         self.assertCountEqual([exp1, exp2, "frames.json"], os.listdir(self.dir + "/output"))
 
     def replace_extension(self, file, ext):
@@ -197,7 +195,7 @@ class TestDirectoryParsing(unittest.TestCase):
         os.rename(self.in_file2.name, new2)
         exp1 = os.path.basename(self.replace_extension(new1, ".json"))
         exp2 = os.path.basename(self.replace_extension(new2, ".json"))
-        self.parser._write_output_directory(self.dir, ext)
+        fp._write_output_directory(self.dir, ext)
         self.assertCountEqual([exp1, exp2, "frames.json"], os.listdir(self.dir + "/output"))
         os.rename(new1, self.in_file1.name)
         os.rename(new2, self.in_file2.name)
@@ -205,16 +203,16 @@ class TestDirectoryParsing(unittest.TestCase):
     def test_total_frame_output_has_correct_data(self):
         """The frames file contains the cumulative frame data"""
         expected = self.get_expected_data()
-        self.parser._write_output_directory(self.dir)
+        fp._write_output_directory(self.dir)
         with open(self.dir + "/output/frames.json") as f:
             self.assertEqual(expected, json.loads(f.read()))
 
     def test_can_automatically_detect_directories(self):
         """Can determine that the input string represents a directory path"""
-        self.assertEqual("directory", self.parser._input_type(self.dir))
+        self.assertEqual("directory", fp._input_type(self.dir))
 
     def test_can_detect_and_write_to_output_dir(self):
         """Given an input string can determine that it is a directory and parse it accordingly"""
         exp1, exp2 = get_expected_names([self.in_file1, self.in_file2])
-        self.parser._detect_input_and_write(self.dir)
+        fp._detect_input_and_write(self.dir)
         self.assertCountEqual([exp1, exp2, "frames.json"], os.listdir(self.dir + "/output"))

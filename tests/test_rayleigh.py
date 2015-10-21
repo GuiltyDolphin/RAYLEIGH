@@ -93,7 +93,6 @@ class TestInterfaceFrame(unittest.TestCase):
     def setUp(self):
         self.interface = rayleigh.RayleighApp()
         self.optparser = self.interface._parser_frame
-        self.parser = self.interface._frame_parser
         self.test_args = []
 
         self.text1 = """1 2 3

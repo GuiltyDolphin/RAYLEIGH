@@ -2,11 +2,11 @@
 # -*- coding: utf-8 -*-
 # frame_parser.py
 
-import re
-import json
-import sys
-import os
 import csv
+import glob
+import json
+import os
+import re
 
 
 def _detect_input_and_write(input_, out_file=None):
@@ -65,8 +65,8 @@ def _retrieve_frame(data):
 
 def _get_frame_from_file(file_name):
     """Retrieve frame from a file object"""
-    with open(file_name) as f:
-        contents = f.read()
+    with open(file_name) as file:
+        contents = file.read()
     return _retrieve_frame(contents)
 
 
@@ -140,16 +140,10 @@ def _write_output_directory(directory, extension=".txt"):
 
     def get_valid_files(directory, ext):
         """Get a list of the (files) that match the extension in directory"""
-        def with_dir(files):
-            """Prepend the directory path to each of the files in file"""
-            return [directory + '/' + x for x in files]
-
-        def with_extension(files):
-            """Get a filtered list of files matching the file extension"""
-            return [x for x in files if os.path.splitext(x)[1] == ext]
-
-        return with_extension(
-            [x for x in with_dir(os.listdir(directory)) if os.path.isfile(x)])
+        files = os.listdir(directory)
+        matches = glob.fnmatch.filter(files, '*{}'.format(ext))
+        full_matches = [os.path.join(directory, file) for file in matches]
+        return [file for file in full_matches if os.path.isfile(file)]
 
     os.mkdir(directory + "/output/")
 
@@ -165,11 +159,11 @@ def _write_output_directory(directory, extension=".txt"):
     def write_to_frames_list():
         """Append the contents of each frame
         (sorted by frame number) to the total frames"""
-        for f in frame_compare():
-            curr_frame_data = _get_output_data_from_file(f)
+        for file in frame_compare():
+            curr_frame_data = _get_output_data_from_file(file)
             frames.append(json.loads(curr_frame_data))
-            _write_data(curr_frame_data, gen_output_path(f))
+            _write_data(curr_frame_data, gen_output_path(file))
 
     write_to_frames_list()
-    with open(directory + "/output/frames.json", 'w') as f:
-        f.write(json.dumps(frames, indent=2))
+    with open(directory + "/output/frames.json", 'w') as file:
+        file.write(json.dumps(frames, indent=2))

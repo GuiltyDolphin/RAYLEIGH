@@ -148,13 +148,24 @@ def _write_output_directory(directory, extension=".txt"):
     os.mkdir(directory + "/output/")
 
     frames = []
-    frame_number_matcher = re.compile(
-        "(\d+)\D*\.{}".format(extension.partition(".")[2]))
+
+    def get_frame_file_number(file_name):
+        """Get the frame number associated with the file"""
+        base = os.path.basename(file_name)
+        print("Got file: {}".format(file_name))
+        return int(
+            re.match('^.*(\d+){}$'.format(
+                re.escape(extension)), base).groups()[0])
 
     def frame_compare():
-        def cmp_func(x):
-            return int(frame_number_matcher.findall(x)[0])
-        return sorted(get_valid_files(directory, extension), key=cmp_func)
+        """Get a sorted array of the files
+
+        This needs to be done so that the JSON output will have
+        the frames in the correct order.
+        """
+        return sorted(
+            get_valid_files(directory, extension),
+            key=get_frame_file_number)
 
     def write_to_frames_list():
         """Append the contents of each frame

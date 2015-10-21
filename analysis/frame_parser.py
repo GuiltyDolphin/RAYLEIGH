@@ -130,16 +130,13 @@ def _write_output_directory(directory, extension=".txt"):
     Nothing - Used for side-effects.
     """
 
-    def add_extension(fname, extension):
-        """Append the extension to the file name"""
-        return fname + extension
-
     def gen_output_path(fname):
         """Generate the expected path that the file will be written to"""
-        new_name = add_extension(
-            os.path.splitext(os.path.basename(fname))[0], ".json")
+        base = os.path.basename(fname)
+        without_ext = os.path.splitext(base)[0]
+        with_ext = without_ext + '.json'
         new_dir = os.path.dirname(fname) + "/output/"
-        return new_dir + new_name
+        return new_dir + with_ext
 
     def get_valid_files(directory, ext):
         """Get a list of the (files) that match the extension in directory"""

@@ -20,9 +20,8 @@ class TestFrameGraphing(unittest.TestCase):
     def setUp(self):
         self.xyz = np.random.random_integers(1, 255, (10, 3))
         self.xs, self.ys, self.zs = self.xyz.transpose()
-        self.plotter = plotter.GraphPlotter()
-        self.fig, self.ax = self.plotter._generate_basic_figure()
-        self.heatmap_data = self.plotter._generate_with_coordinates(self.xyz)
+        self.fig, self.ax = plotter._generate_basic_figure()
+        self.heatmap_data = plotter._generate_with_coordinates(self.xyz)
 
         self.dir = tempfile.mkdtemp()
         self.in_file_frame = tempfile.NamedTemporaryFile(
@@ -64,12 +63,12 @@ class TestFrameGraphing(unittest.TestCase):
 
     def test_write_to_file_heatmap_provided(self):
         """Can save a figure to the specified path if a heatmap is provided"""
-        figmap = self.plotter._gen_heatmap_from_file(self.in_file_frame.name)
+        figmap = plotter._gen_heatmap_from_file(self.in_file_frame.name)
         os.mkdir(self.dir + "/plots")
         out_dir = self.dir + "/plots"
         with tempfile.NamedTemporaryFile(dir=self.dir) as f:
             new_name = out_dir + "/{}.png".format(os.path.basename(f.name))
-            self.plotter._write_heatmap(new_name, figmap)
+            plotter._write_heatmap(new_name, figmap)
             expected_contents = [new_name]
         actual = os.listdir(out_dir)
         self.assertIn(os.path.basename(new_name), os.listdir(out_dir))
@@ -80,7 +79,7 @@ class TestFrameGraphing(unittest.TestCase):
 
     def test_can_write_output_file_to_directory(self):
         """The plotter can create and write to a plots directory"""
-        self.plotter._write_heatmap_from_file(self.in_file_frame.name)
+        plotter._write_heatmap_from_file(self.in_file_frame.name)
         expected_contents = [os.path.basename(self.out_name)]
         actual = os.listdir(self.dir + "/plots")
         self.assertCountEqual(expected_contents, actual)
@@ -92,21 +91,21 @@ class TestFrameGraphing(unittest.TestCase):
         outliers = 1
         d_max = np.abs(vals - vals.mean()) / vals.std()
         new_frame = ma.masked_array(vals, mask=d_max >= outliers)
-        arr = self.plotter._generate_with_coordinates(frame, outliers=outliers)
+        arr = plotter._generate_with_coordinates(frame, outliers=outliers)
         np.testing.assert_array_equal(
             new_frame.compressed().sort(), arr.compressed().sort())
 
     def test_basic_figure_correct_number_axes(self):
-        fig, axes = self.plotter._generate_basic_figure(5)
+        fig, axes = plotter._generate_basic_figure(5)
         self.assertEqual((2, 3), axes.shape)
 
     def test_basic_figure_hides_correct_axes(self):
-        fig, axes = self.plotter._generate_basic_figure(10)
+        fig, axes = plotter._generate_basic_figure(10)
         for x in [(-1, -1), (-1, -2)]:
             self.assertFalse(axes[x].axison)
 
     def test_can_read_multiple_files(self):
         file_names = [self.in_file_frame.name, self.in_file_frame2.name]
         exp_data = np.array([self.heatmap_data, self.heatmap_data])
-        data = self.plotter._gen_multi_from_files(file_names)
+        data = plotter._gen_multi_from_files(file_names)
         np.testing.assert_array_equal(exp_data, data)

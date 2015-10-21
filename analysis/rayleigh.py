@@ -14,7 +14,6 @@ from analysis import plotter
 
 class RayleighApp():
     def __init__(self):
-        self._plotter = plotter.GraphPlotter()
 
         self._parser = argparse.ArgumentParser(
             description="Perform operations on framedata from TimePix chips",
@@ -71,19 +70,19 @@ class RayleighApp():
 
             if len(file_names) > 1:
                 if args.single_figure:
-                    self._plotter._read_and_generate_heatmaps(
+                    plotter._read_and_generate_heatmaps(
                         file_names, outliers=args.outliers)
 
                 if args.write:
-                    self._plotter._write_multi(file_names)
+                    plotter._write_multi(file_names)
             else:
                 file_name = file_names[0]
                 # Assume heatmap for the moment
-                figmap = self._plotter._gen_heatmap_from_file(
+                figmap = plotter._gen_heatmap_from_file(
                     file_name, outliers=args.outliers)
 
                 if args.write:
-                    self._plotter._write_heatmap_from_file(file_name)
+                    plotter._write_heatmap_from_file(file_name)
 
             if not args.no_view:
                 plt.show()

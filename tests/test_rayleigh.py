@@ -34,11 +34,10 @@ class TestInterfacePlotter(unittest.TestCase):
 
         self.interface = rayleigh.RayleighApp()
         self.plotparser = self.interface._parser_plot
-        self.plotter = self.interface._plotter
         self.test_args = ['--no-view']
 
-        self.fig, self.ax = self.plotter._generate_basic_figure()
-        self.heatmap_data = self.plotter._generate_with_coordinates(self.xyz)
+        self.fig, self.ax = plotter._generate_basic_figure()
+        self.heatmap_data = plotter._generate_with_coordinates(self.xyz)
 
         self.dir = tempfile.mkdtemp()
         self.in_file_frame = tempfile.NamedTemporaryFile(

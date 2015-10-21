@@ -19,26 +19,6 @@ def _detect_input_and_write(input_, out_file=None):
             "Not a valid file or directory: {}".format(input_))
 
 
-def _write_data(data, path):
-    """Write the JSON data to a file or stdout
-
-    Parameters
-    ----------
-    data : (string)
-            The data to be written to a file.
-    path : (string), optional
-            The path that the data will be written to.
-            The default (None) causes the data to be written
-            to STDOUT.
-
-    Returns
-    -------
-    Nothing - Used for side-effects.
-    """
-    with open(path, 'w') as f:
-        f.write(data)
-
-
 def _gen_output_data(data):
     """Generate the JSON representation of the data
 
@@ -99,18 +79,38 @@ def _parse_file_and_write(in_file, out_file=None):
             Path to the file to be read
     out_file : (string), optional
             The path to write the output data to.
-            The default (None) will cause the output to be written to STDOUT.
+            The default (None) will automatically generate a filename based on
+            the input file.
 
     Returns
     -------
-    output_data (string)
-        The resulting parsed data as a JSON string.
+    Nothing - used for side effects.
     """
-    to_write = out_file or os.path.splitext(in_file)[0] + '.json'
-    frame = _get_frame_from_file(in_file)
-    output_data = _gen_output_data(frame)
-    _write_data(output_data, to_write)
-    return output_data
+    data = _get_output_data_from_file(in_file)
+    _write_data(data, out_file)
+
+
+def _write_data(data, file_name=None):
+    to_write = file_name or os.path.splitext(in_file)[0] + '.json'
+    with open(to_write, 'w') as fname:
+        fname.write(data)
+
+
+def _get_output_data_from_file(file_name):
+    """Generate the JSON data from a frame file
+
+    Parameters
+    ----------
+    file_name : (string)
+              Path to the file to read
+
+    Returns
+    -------
+    result : (String)
+            The JSON serialised string
+    """
+    frame = _get_frame_from_file(file_name)
+    return _gen_output_data(frame)
 
 
 def _write_output_directory(directory, extension=".txt"):
@@ -166,8 +166,9 @@ def _write_output_directory(directory, extension=".txt"):
         """Append the contents of each frame
         (sorted by frame number) to the total frames"""
         for f in frame_compare():
-            frames.append(json.loads(
-                _parse_file_and_write(f, gen_output_path(f))))
+            curr_frame_data = _get_output_data_from_file(f)
+            frames.append(json.loads(curr_frame_data))
+            _write_data(curr_frame_data, gen_output_path(f))
 
     write_to_frames_list()
     with open(directory + "/output/frames.json", 'w') as f:

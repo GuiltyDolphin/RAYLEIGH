@@ -60,15 +60,6 @@ class TestFrameParser(unittest.TestCase):
         actual_json_data = json.loads(fp._gen_output_data(data))
         self.assertEqual(expected_json_data, actual_json_data)
 
-    def test_output_frame_data_written_correctly_to_file(self):
-        """Standard data can be written to a file"""
-        clusters = self.get_hits(self.frame_data)
-        data = fp._gen_output_data(clusters)
-        expected = json.loads(data)
-        fp._write_data(data, self.out_file.name)
-        with open(self.out_file.name) as f:
-            self.assertEqual(expected, json.loads(f.read()))
-
 
 class TestDirectoryParsing(unittest.TestCase):
     """Tests regarding multiple files for the FrameParser"""

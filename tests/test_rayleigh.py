@@ -52,7 +52,6 @@ class TestInterfacePlotter(unittest.TestCase):
 
         self.out_name = get_new_file_name(self.in_file_frame.name)
 
-
     def tearDown(self):
         os.remove(self.in_file_frame.name)
         shutil.rmtree(self.dir)
@@ -78,8 +77,9 @@ class TestInterfacePlotter(unittest.TestCase):
         self.assertEqual(False, self.plotparser.get_default('single_figure'))
 
     def test_accepts_single_files_and_writes(self):
-        """The App can save the figure to a file when the write option is passed with a file name"""
-        self.interface._run(['plot'] + self.test_args + [self.in_file_frame.name, '-w'])
+        """Can save the figure to a file when the write option is passed"""
+        self.interface._run(
+            ['plot'] + self.test_args + [self.in_file_frame.name, '-w'])
         expected_contents = [os.path.basename(self.out_name)]
         actual = os.listdir(self.dir + "/plots")
         self.assertCountEqual(expected_contents, actual)
@@ -102,8 +102,10 @@ class TestInterfaceFrame(unittest.TestCase):
         16 17 18"""
         self.dir = tempfile.mkdtemp()
         file_options = {'delete': False, 'dir': self.dir}
-        self.in_file1 = tempfile.NamedTemporaryFile(suffix="d00.txt", **file_options)
-        self.in_file2 = tempfile.NamedTemporaryFile(suffix="d01.txt", **file_options)
+        self.in_file1 = tempfile.NamedTemporaryFile(
+            suffix="d00.txt", **file_options)
+        self.in_file2 = tempfile.NamedTemporaryFile(
+            suffix="d01.txt", **file_options)
         file_options.update(suffix='.txt.dsc')
         self.dsc_file = tempfile.NamedTemporaryFile(**file_options)
 
@@ -138,5 +140,5 @@ class TestInterfaceFrame(unittest.TestCase):
         """Can parse user file input and write"""
         exp1, exp2 = get_expected_names([self.in_file1, self.in_file2])
         self.interface._run(['frame'] + self.test_args + [self.dir])
-        self.assertCountEqual([exp1, exp2, "frames.json"], os.listdir(self.dir + "/output"))
-
+        self.assertCountEqual(
+            [exp1, exp2, "frames.json"], os.listdir(self.dir + "/output"))

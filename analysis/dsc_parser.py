@@ -8,6 +8,7 @@ from collections import deque
 
 pk_protocol = 4
 
+
 class Frame:
     """Frame object to represent the data contained within .dsc files"""
     def __init__(self, **kwargs):
@@ -22,11 +23,14 @@ class Frame:
         self._medipix_interface = kwargs.get("medipix_interface", None)
         self._medipix_clock = kwargs.get("medipix_clock", None)
         self._medipix_type = kwargs.get("medipix_type", None)
-        self._name_and_serial_number = kwargs.get("name_and_serial_number", None)
+        self._name_and_serial_number = kwargs.get(
+            "name_and_serial_number", None)
         self._pixelman_version = kwargs.get("pixelman_version", None)
         self._detector_polarity = kwargs.get("detector_polarity", None)
-        self._acquisition_start_time = kwargs.get("acquisition_start_time", None)
-        self._acquisition_start_time_string = kwargs.get("acquisition_start_time_string", None)
+        self._acquisition_start_time = kwargs.get(
+            "acquisition_start_time", None)
+        self._acquisition_start_time_string = kwargs.get(
+            "acquisition_start_time_string", None)
         self._timepix_clock = kwargs.get("timepix_clock", None)
 
 
@@ -35,11 +39,15 @@ class DSCParser:
     def __init__(self):
         self._blank_frame = Frame()
         self._dsc_reg = {
-                'title': re.compile('"?(?P<short_name>(?:\w\s?)+)[^"]*"?(?:\s+\("(?P<long_name>(?:\w\s?)+)(?:[\[(].+[)\]])?"\):)?'),
-                'data_type': re.compile("(?P<type>\w*)\[(?P<num>\w*)\]"),
-                'value': re.compile("(?P<value>.+)"),
-                'header': re.compile("Type=(?P<type>.+) width=(?P<width>\d+) height=(?P<height>\d+)")
-                }
+            'title': re.compile(
+                '"?(?P<short_name>(?:\w\s?)+)'
+                + '[^"]*"?(?:\s+\("(?P<long_name>(?:\w\s?)+)'
+                + '(?:[\[(].+[)\]])?"\):)?'),
+            'data_type': re.compile("(?P<type>\w*)\[(?P<num>\w*)\]"),
+            'value': re.compile("(?P<value>.+)"),
+            'header': re.compile(
+                "Type=(?P<type>.+) width=(?P<width>\d+) height=(?P<height>\d+)"
+                )}
 
     def _pickle_from_dsc(self, dsc_data):
         """Produce a pickled Frame object from a .dsc file"""
@@ -60,10 +68,13 @@ class DSCParser:
         use_short_names = ["DACs values of all chips",
                            "Medipix or chipboard ID"]
         expect_list = [("DACs", " ")]
-        use_alternate = [('[Ss]tart time \(string\)', "acquisition start time string"),
-                ('ChipboardID', 'chipboard id')]
+        use_alternate = [
+            ('[Ss]tart time \(string\)', "acquisition start time string"),
+            ('ChipboardID', 'chipboard id')]
         for conf in config:
-            kvs.update(self._parse_config(conf, use_short_names, expect_list, use_alternate))
+            kvs.update(
+                self._parse_config(
+                    conf, use_short_names, expect_list, use_alternate))
 
         return Frame(**kvs)
 
@@ -71,7 +82,8 @@ class DSCParser:
         """Analyse a .dsc header. Return a dictionary for
         header values and the header attachment if any"""
         header_type = self._dsc_reg['header'].match(header[2]).groupdict()
-        header_type['name'] = self._dsc_reg['title'].match(header[0]).groupdict()['short_name']
+        header_type['name'] = self._dsc_reg['title'].match(
+            header[0]).groupdict()['short_name']
         for entry in ['height', 'width']:
             header_type[entry] = int(header_type[entry])
         return (header_type, header[3:])
@@ -125,6 +137,3 @@ class DSCParser:
             return return_hash('short_name')
         else:
             return return_hash('long_name')
-
-
-

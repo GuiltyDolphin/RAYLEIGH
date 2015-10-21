@@ -132,7 +132,6 @@ class RayleighApp():
             sys.exit(1)
 
 
-
 def main():
     app = RayleighApp()
     app._run(sys.argv[1:])

@@ -101,17 +101,17 @@ class TestDSCParser(unittest.TestCase):
 
     def test_can_analyse_dsc_header(self):
         header = [
-                "A0000001",
-                "[F0]",
-                "Type=i16 [X,Y,C] width=256 height=256",
-                "\"Acq mode\" (\"Acquisition mode\")",
-                "i32[1]",
-                "1"]
+            "A0000001",
+            "[F0]",
+            "Type=i16 [X,Y,C] width=256 height=256",
+            "\"Acq mode\" (\"Acquisition mode\")",
+            "i32[1]",
+            "1"]
         expected_dict = {
-                'name': "A0000001",
-                'type': "i16 [X,Y,C]",
-                'width': 256,
-                'height': 256}
+            'name': "A0000001",
+            'type': "i16 [X,Y,C]",
+            'width': 256,
+            'height': 256}
         expected = (expected_dict, header[3:])
         self.assertEqual(expected, self.parser._analyse_dsc_header(header))
 
@@ -131,7 +131,9 @@ class TestDSCParser(unittest.TestCase):
         config_alternate = [('[sS]tart time \(string\)', "start time string")]
         config.insert(0, "Start time (string)")
         expected = dict(start_time_string=2)
-        self.assertEqual(expected, self.parser._parse_config(config, use_alternate=config_alternate))
+        self.assertEqual(
+            expected,
+            self.parser._parse_config(config, use_alternate=config_alternate))
 
     def test_can_create_frame_from_dsc(self):
         frame = self.parser._frame_from_dsc(self.dsc_data)

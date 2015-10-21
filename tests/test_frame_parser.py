@@ -86,8 +86,10 @@ class TestDirectoryParsing(unittest.TestCase):
         16 17 18"""
         self.dir = tempfile.mkdtemp()
         file_options = {'delete': False, 'dir': self.dir}
-        self.in_file1 = tempfile.NamedTemporaryFile(suffix="d00.txt", **file_options)
-        self.in_file2 = tempfile.NamedTemporaryFile(suffix="d01.txt", **file_options)
+        self.in_file1 = tempfile.NamedTemporaryFile(
+            suffix="d00.txt", **file_options)
+        self.in_file2 = tempfile.NamedTemporaryFile(
+            suffix="d01.txt", **file_options)
         file_options.update(suffix='.txt.dsc')
         self.dsc_file = tempfile.NamedTemporaryFile(**file_options)
         with open(self.in_file1.name, 'w') as f:
@@ -111,7 +113,8 @@ class TestDirectoryParsing(unittest.TestCase):
     def test_creates_suitable_directory_structure(self):
         """Creates a suitable directory structure"""
         fp._write_output_directory(self.dir)
-        name1, name2, name3 = get_base_names([self.in_file1, self.in_file2, self.dsc_file])
+        name1, name2, name3 = get_base_names(
+            [self.in_file1, self.in_file2, self.dsc_file])
         exp1, exp2 = get_expected_names([self.in_file1, self.in_file2])
         actual = os.listdir(self.dir)
         expected_contents = [name1, name2, name3, "output"]
@@ -138,7 +141,8 @@ class TestDirectoryParsing(unittest.TestCase):
         """Only the files with the given extension are parsed"""
         exp1, exp2 = get_expected_names([self.in_file1, self.in_file2])
         fp._write_output_directory(self.dir)
-        self.assertCountEqual([exp1, exp2, "frames.json"], os.listdir(self.dir + "/output"))
+        self.assertCountEqual(
+            [exp1, exp2, "frames.json"], os.listdir(self.dir + "/output"))
 
     def replace_extension(self, file, ext):
         return os.path.splitext(file)[0] + ext
@@ -153,7 +157,8 @@ class TestDirectoryParsing(unittest.TestCase):
         exp1 = os.path.basename(self.replace_extension(new1, ".json"))
         exp2 = os.path.basename(self.replace_extension(new2, ".json"))
         fp._write_output_directory(self.dir, ext)
-        self.assertCountEqual([exp1, exp2, "frames.json"], os.listdir(self.dir + "/output"))
+        self.assertCountEqual(
+            [exp1, exp2, "frames.json"], os.listdir(self.dir + "/output"))
         os.rename(new1, self.in_file1.name)
         os.rename(new2, self.in_file2.name)
 
@@ -169,7 +174,8 @@ class TestDirectoryParsing(unittest.TestCase):
         self.assertEqual("directory", fp._input_type(self.dir))
 
     def test_can_detect_and_write_to_output_dir(self):
-        """Given an input string can determine that it is a directory and parse it accordingly"""
+        """Can detect and write to directories"""
         exp1, exp2 = get_expected_names([self.in_file1, self.in_file2])
         fp._detect_input_and_write(self.dir)
-        self.assertCountEqual([exp1, exp2, "frames.json"], os.listdir(self.dir + "/output"))
+        self.assertCountEqual(
+            [exp1, exp2, "frames.json"], os.listdir(self.dir + "/output"))

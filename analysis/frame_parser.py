@@ -164,7 +164,8 @@ def _write_output_directory(directory, extension=".txt"):
     os.mkdir(directory + "/output/")
 
     frames = []
-    frame_number_matcher = re.compile("(\d+)\D*\.{}".format(extension.partition(".")[2]))
+    frame_number_matcher = re.compile(
+        "(\d+)\D*\.{}".format(extension.partition(".")[2]))
 
     def frame_compare():
         def cmp_func(x):

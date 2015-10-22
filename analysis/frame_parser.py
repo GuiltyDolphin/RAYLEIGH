@@ -10,6 +10,12 @@ import re
 
 
 def _detect_input_and_write(input_, out_file=None):
+    """Perform file conversion based on input type
+
+    If input is a directory, then perform a conversion on each
+    file in the directory.
+
+    If input is a file, then perform conversion on only that file."""
     if os.path.isdir(input_):
         _write_output_directory(input_)
     elif os.path.isfile(input_):
@@ -87,12 +93,16 @@ def _parse_file_and_write(in_file, out_file=None):
     Nothing - used for side effects.
     """
     data = _get_output_data_from_file(in_file)
-    _write_data(data, out_file)
+    if out_file is not None:
+        _write_data(data, out_file)
+    else:
+        to_write = _gen_output_path(in_file)
+        os.mkdir(os.path.dirname(to_write))
+        _write_data(data, to_write)
 
 
-def _write_data(data, file_name=None):
-    to_write = file_name or os.path.splitext(in_file)[0] + '.json'
-    with open(to_write, 'w') as fname:
+def _write_data(data, file_name):
+    with open(file_name, 'w') as fname:
         fname.write(data)
 
 
@@ -130,14 +140,6 @@ def _write_output_directory(directory, extension=".txt"):
     Nothing - Used for side-effects.
     """
 
-    def gen_output_path(fname):
-        """Generate the expected path that the file will be written to"""
-        base = os.path.basename(fname)
-        without_ext = os.path.splitext(base)[0]
-        with_ext = without_ext + '.json'
-        new_dir = os.path.dirname(fname) + "/output/"
-        return new_dir + with_ext
-
     def get_valid_files(directory, ext):
         """Get a list of the (files) that match the extension in directory"""
         files = os.listdir(directory)
@@ -173,8 +175,17 @@ def _write_output_directory(directory, extension=".txt"):
         for file in frame_compare():
             curr_frame_data = _get_output_data_from_file(file)
             frames.append(json.loads(curr_frame_data))
-            _write_data(curr_frame_data, gen_output_path(file))
+            _write_data(curr_frame_data, _gen_output_path(file))
 
     write_to_frames_list()
     with open(directory + "/output/frames.json", 'w') as file:
         file.write(json.dumps(frames, indent=2))
+
+
+def _gen_output_path(fname, extension='.json'):
+    """Generate the expected path that the file will be written to"""
+    base = os.path.basename(fname)
+    without_ext = os.path.splitext(base)[0]
+    with_ext = without_ext + extension
+    new_dir = os.path.dirname(fname) + "/output/"
+    return new_dir + with_ext

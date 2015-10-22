@@ -162,3 +162,9 @@ class TestDirectoryParsing(unittest.TestCase):
         fp._detect_input_and_write(self.dir)
         self.assertCountEqual(
             [exp1, exp2, "frames.json"], os.listdir(self.dir + "/output"))
+
+    def test_can_write_individual_files(self):
+        exp1 = get_expected_names([self.in_file1])[0]
+        fp._detect_input_and_write(self.in_file1.name)
+        self.assertCountEqual(
+            [exp1], os.listdir(os.path.dirname(self.in_file1.name) + '/output'))

@@ -6,6 +6,7 @@ from matplotlib import pyplot as plt
 import numpy as np
 import numpy.ma as ma
 
+from contextlib import suppress
 import json
 import math
 import os
@@ -14,7 +15,7 @@ import os
 def _write_multi(files, output=None):
     fig, ax, heatmap = _read_and_generate_heatmaps(files)
     dname = os.path.dirname(files[0]) + "/plots"
-    if not os.path.exists(dname):
+    with suppress(FileExistsError):
         os.mkdir(dname)
     _write_heatmap(output or "{}/plots/{}.png".format(
         os.path.dirname(files[0]), os.path.basename(files[0])),
@@ -63,7 +64,7 @@ def _write_heatmap_from_file(input_file, output=None):
     """
     fig, ax, heatmap = _gen_heatmap_from_file(input_file)
     dname = os.path.dirname(input_file) + "/plots"
-    if not os.path.exists(dname):
+    with suppress(FileExistsError):
         os.mkdir(dname)
     _write_heatmap(output or "{}/plots/{}.png".format(
         os.path.dirname(input_file), os.path.basename(input_file)),

@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 # frame_parser.py
 
+from contextlib import suppress
 import csv
 import glob
 import json
@@ -97,7 +98,8 @@ def _parse_file_and_write(in_file, out_file=None):
         _write_data(data, out_file)
     else:
         to_write = _gen_output_path(in_file)
-        os.mkdir(os.path.dirname(to_write))
+        with suppress(FileExistsError):
+            os.mkdir(os.path.dirname(to_write))
         _write_data(data, to_write)
 
 
@@ -147,7 +149,8 @@ def _write_output_directory(directory, extension=".txt"):
         full_matches = [os.path.join(directory, file) for file in matches]
         return [file for file in full_matches if os.path.isfile(file)]
 
-    os.mkdir(directory + "/output/")
+    with suppress(FileExistsError):
+        os.mkdir(directory + "/output/")
 
     frames = []
 

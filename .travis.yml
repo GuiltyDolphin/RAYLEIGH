@@ -3,3 +3,5 @@ python:
   - 3.4
 notifications:
   email: false
+install: pip install --user .
+script: nosetests

@@ -1,4 +1,6 @@
-# RAYLEIGH [![Build Status](https://travis-ci.org/GuiltyDolphin/RAYLEIGH.svg?branch=master)](https://travis-ci.org/GuiltyDolphin/RAYLEIGH)
+# RAYLEIGH 
+
+[![Build Status](https://travis-ci.org/GuiltyDolphin/RAYLEIGH.svg?branch=master)](https://travis-ci.org/GuiltyDolphin/RAYLEIGH) [![Coverage Status](https://coveralls.io/repos/github/GuiltyDolphin/RAYLEIGH/badge.svg?branch=master)](https://coveralls.io/github/GuiltyDolphin/RAYLEIGH?branch=master)
 
 A plotter and file converter for output files from TimePix chips.
 

@@ -38,12 +38,17 @@ class TestInterfacePlotter(unittest.TestCase):
 
         self.fig, self.ax = plotter._generate_basic_figure()
         self.heatmap_data = plotter._generate_with_coordinates(self.xyz)
-
         self.dir = tempfile.mkdtemp()
-        self.in_file_frame = tempfile.NamedTemporaryFile(
-            delete=False, dir=self.dir)
-        with open(self.in_file_frame.name, 'w') as f:
-            f.write(json.dumps(self.xyz))
+
+        def new_test_file():
+            in_file_frame = tempfile.NamedTemporaryFile(
+                delete=False, dir=self.dir)
+            with open(in_file_frame.name, 'w') as f:
+                f.write(json.dumps(self.xyz))
+            return in_file_frame
+
+        self.in_file_frame = new_test_file()
+        self.in_file_frame2 = new_test_file()
 
         def get_new_file_name(fname):
             base = os.path.basename(fname)
@@ -83,6 +88,32 @@ class TestInterfacePlotter(unittest.TestCase):
         expected_contents = [os.path.basename(self.out_name)]
         actual = os.listdir(self.dir + "/plots")
         self.assertCountEqual(expected_contents, actual)
+
+    def test_recognizes_non_existent_files(self):
+        """Able to recognize when an argument file does not exist."""
+        with self.assertRaises(SystemExit):
+            self.interface._run(
+                ['plot'] + self.test_args + [self.dir + "/invalid-file"])
+
+    def test_does_not_accept_individual_directory(self):
+        """Will not accept a single directory as an argument."""
+        with self.assertRaises(SystemExit):
+            self.interface._run(
+                ['plot'] + self.test_args + [self.dir])
+
+    def test_multiple_files_single_figure(self):
+        """Plotting multiple files on a single figure."""
+        self.interface._run(
+            ['plot'] + self.test_args +
+            [self.in_file_frame.name, self.in_file_frame2.name, '-w'])
+        expected_contents = [os.path.basename(self.out_name)]
+        actual = os.listdir(self.dir + "/plots")
+        self.assertCountEqual(expected_contents, actual)
+
+    def test_no_arguments(self):
+        """Should exit if no arguments provided."""
+        with self.assertRaises(SystemExit):
+            self.interface._run([])
 
 
 class TestInterfaceFrame(unittest.TestCase):

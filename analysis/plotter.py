@@ -39,10 +39,8 @@ def _gen_heatmap_from_file(file_name, **kwargs):
     heatmap : (Todo: Unknown)
         The actual heatmap object
     """
-    def fltint(x):
-        return int(float(x))
     with open(file_name) as f:
-        frame = json.load(f, parse_float=fltint)
+        frame = json.load(f, parse_float=lambda x: int(float(x)))
     data = _generate_with_coordinates(frame, **kwargs)
     return _gen_heatmap(data)
 
@@ -206,12 +204,9 @@ def _generate_with_coordinates(frame, outliers=None):
 def _gen_multi_from_files(file_names, outliers=None):
     data = []
 
-    def fltint(x):
-        return int(float(x))
-
     for file_name in file_names:
         with open(file_name) as f:
-            loaded_data = json.load(f, parse_float=fltint)
+            loaded_data = json.load(f, parse_float=lambda x: int(float(x)))
             data.append(
                 _generate_with_coordinates(
                     loaded_data, outliers=outliers))

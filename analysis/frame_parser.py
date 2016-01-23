@@ -95,12 +95,12 @@ def _parse_file_and_write(in_file, out_file=None):
     """
     data = _get_output_data_from_file(in_file)
     if out_file is not None:
-        _write_data(data, out_file)
+        to_write = out_file
     else:
         to_write = _gen_output_path(in_file)
-        with suppress(FileExistsError):
-            os.mkdir(os.path.dirname(to_write))
-        _write_data(data, to_write)
+    with suppress(FileExistsError):
+        os.mkdir(os.path.dirname(to_write))
+    _write_data(data, to_write)
 
 
 def _write_data(data, file_name):

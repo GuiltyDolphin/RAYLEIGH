@@ -173,3 +173,11 @@ class TestDirectoryParsing(unittest.TestCase):
     def test_rejects_non_existent_file(self):
         with self.assertRaises(FileNotFoundError):
             fp._detect_input_and_write(self.dir + "/invalid")
+
+    def test_provided_output_file(self):
+        exp1 = 'test.json'
+        fp._detect_input_and_write(
+            self.in_file1.name, '{}/output/{}'.format(self.dir, exp1))
+        self.assertCountEqual(
+            [exp1], os.listdir(
+                os.path.dirname(self.in_file1.name) + '/output'))

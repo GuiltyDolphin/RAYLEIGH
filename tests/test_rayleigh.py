@@ -173,3 +173,14 @@ class TestInterfaceFrame(unittest.TestCase):
         self.interface._run(['frame'] + self.test_args + [self.dir])
         self.assertCountEqual(
             [exp1, exp2, "frames.json"], os.listdir(self.dir + "/output"))
+
+    def test_fails_with_non_existent_file(self):
+        """Exits if the input file does not exist."""
+        with self.assertRaises(SystemExit):
+            self.interface._run(
+                ['frame'] + self.test_args + [self.dir + "/invalid"])
+
+    def test_main_no_arguments(self):
+        """Exits with no arguments."""
+        with self.assertRaises(SystemExit):
+            rayleigh.main()

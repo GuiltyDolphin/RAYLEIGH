@@ -167,4 +167,9 @@ class TestDirectoryParsing(unittest.TestCase):
         exp1 = get_expected_names([self.in_file1])[0]
         fp._detect_input_and_write(self.in_file1.name)
         self.assertCountEqual(
-            [exp1], os.listdir(os.path.dirname(self.in_file1.name) + '/output'))
+            [exp1], os.listdir(
+                os.path.dirname(self.in_file1.name) + '/output'))
+
+    def test_rejects_non_existent_file(self):
+        with self.assertRaises(FileNotFoundError):
+            fp._detect_input_and_write(self.dir + "/invalid")

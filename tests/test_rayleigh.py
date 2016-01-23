@@ -105,7 +105,8 @@ class TestInterfacePlotter(unittest.TestCase):
         """Plotting multiple files on a single figure."""
         self.interface._run(
             ['plot'] + self.test_args +
-            [self.in_file_frame.name, self.in_file_frame2.name, '-w'])
+            [self.in_file_frame.name, self.in_file_frame2.name,
+                '-w', '--single-figure'])
         expected_contents = [os.path.basename(self.out_name)]
         actual = os.listdir(self.dir + "/plots")
         self.assertCountEqual(expected_contents, actual)

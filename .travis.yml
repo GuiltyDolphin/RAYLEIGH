@@ -3,5 +3,14 @@ python:
   - 3.4
 notifications:
   email: false
-install: pip install .
-script: nosetests
+install:
+  - pip install .
+  - pip install coveralls
+before_script:
+  - "export DISPLAY=:99.0"
+  - "sh -e /etc/init.d/xvfb start"
+  - sleep 3
+script:
+  coverage run --source=analysis setup.py test
+after_success:
+  coveralls

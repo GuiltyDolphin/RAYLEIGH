@@ -28,7 +28,8 @@ setup(
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
         "Operating System :: POSIX :: Linux"],
     url="https://www.github.com/GuiltyDolphin/RAYLEIGH",
-    download_url="https://github.com/GuiltyDolphin/RAYLEIGH/tarball/0.2.0",
+    download_url="https://github.com/GuiltyDolphin/RAYLEIGH/tarball/{}".format(
+        analysis.__version__),
 
     test_suite='nose.collector'
     )

@@ -11,6 +11,8 @@ from matplotlib import pyplot as plt
 from analysis import frame_parser as fp
 from analysis import plotter
 
+import analysis
+
 
 class RayleighApp():
     def __init__(self):
@@ -24,7 +26,7 @@ class RayleighApp():
         self._parser.add_argument(
             '--version',
             action='version',
-            version='rayleigh 0.2.0')
+            version="rayleigh {}".format(analysis.__version__))
 
         subparsers = self._parser.add_subparsers(
             title="commands")
